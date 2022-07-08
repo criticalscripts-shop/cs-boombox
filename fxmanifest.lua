@@ -3,7 +3,7 @@ fx_version 'bodacious'
 game 'gta5'
 
 author 'Critical Scripts | https://criticalscripts.shop'
-version '1.1'
+version '1.0'
 
 lua54 'yes'
 
@@ -36,13 +36,6 @@ client_scripts {
 server_scripts {
     'server/core.lua',
     'integration/server.lua'
-}
-
-escrow_ignore {
-    'config.lua',
-    'integration/server.lua',
-    'integration/client.lua',
-    'client/ui/**/*.js'
 }
 
 dependency '/onesync'

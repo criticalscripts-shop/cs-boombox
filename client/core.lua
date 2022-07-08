@@ -3,7 +3,7 @@ if (not config) then
     return
 end
 
-local internalVersion = '1.1.3'
+local internalVersion = '1.0'
 
 local inRangeUUIDs = {}
 local inRangeObjects = {}
