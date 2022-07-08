@@ -43,7 +43,7 @@ end)
 
 AddEventHandler('cs-boombox:onPlay', function(uniqueId, source, data)
     -- Triggered when play is triggered either manually or via an export.
-    -- The uniqueId indicates which entry config key the action triggered for.
+    -- The uniqueId indicates which boombox object the action is triggered for.
     -- If the source is nil then this action was triggered via an export otherwise it is the source player.
 
     --[[
@@ -58,7 +58,7 @@ end)
 
 AddEventHandler('cs-boombox:onPause', function(uniqueId, source, data)
     -- Triggered when pause is triggered either manually or via an export.
-    -- The uniqueId indicates which entry config key the action triggered for.
+    -- The uniqueId indicates which boombox object the action is triggered for.
     -- If the source is nil then this action was triggered via an export otherwise it is the source player.
 
     --[[
@@ -73,7 +73,7 @@ end)
 
 AddEventHandler('cs-boombox:onStop', function(uniqueId, source, data)
     -- Triggered when stop is triggered either manually, automatically (stopped due to end / error etc.) or via an export.
-    -- The uniqueId indicates which entry config key the action triggered for.
+    -- The uniqueId indicates which boombox object the action is triggered for.
     -- If the source is nil then this action was triggered via an export otherwise it is the source player.
 
     --[[
@@ -89,7 +89,7 @@ end)
 AddEventHandler('cs-boombox:onDuration', function(uniqueId, source, duration)
     -- Triggered when duration is set for the current entry via a client.
     -- This does not trigger via an export.
-    -- The uniqueId indicates which entry config key the action triggered for.
+    -- The uniqueId indicates which boombox object the action is triggered for.
     -- If the source is nil then this action was triggered via an export otherwise it is the source player.
     -- The duration is in seconds. If this event is not triggered within a timely manner we can assume that the responsible update client failed to retrieve the duration of the entry.
 end)
@@ -97,7 +97,7 @@ end)
 AddEventHandler('cs-boombox:onEntryQueued', function(uniqueId, source, data)
     -- Triggered when an entry is added to queue either manually or via an export.
     -- This does not trigger when an entry changes position.
-    -- The uniqueId indicates which entry config key the action triggered for.
+    -- The uniqueId indicates which boombox object the action is triggered for.
     -- If the source is nil then this action was triggered via an export otherwise it is the source player.
 
     --[[
@@ -115,7 +115,7 @@ end)
 AddEventHandler('cs-boombox:onEntryRemoved', function(uniqueId, source, data)
     -- Triggered when an entry is removed from queue either manually or via an export.
     -- This does not trigger when an entry is moved from the queue to the player or when an entry changes position.
-    -- The uniqueId indicates which entry config key the action triggered for.
+    -- The uniqueId indicates which boombox object the action is triggered for.
     -- If the source is nil then this action was triggered via an export otherwise it is the source player.
 
     --[[
@@ -133,13 +133,13 @@ end)
 -- Server Exports
 
 --[[
-    exports['cs-boombox']:Play(uniqueId)                               -- Trigger a play action in the specified uniqueId. The uniqueId is the config entry's key.
-    exports['cs-boombox']:Pause(uniqueId)                              -- Trigger a pause action in the specified uniqueId. The uniqueId is the config entry's key.
-    exports['cs-boombox']:Stop(uniqueId)                               -- Trigger a stop action in the specified uniqueId. The uniqueId is the config entry's key.
-    exports['cs-boombox']:IsPlaying(uniqueId)                          -- Returns whether an entry is playing in the specified uniqueId. The uniqueId is the config entry's key.
-    exports['cs-boombox']:SetLoop(uniqueId, state)                     -- Sets the player loop state of the specified uniqueId. The uniqueId is the config entry's key. The state is a boolean indicating the loop state.
+    exports['cs-boombox']:Play(uniqueId)                               -- Trigger a play action in the specified by uniqueId boombox. The uniqueId is the config entry's key.
+    exports['cs-boombox']:Pause(uniqueId)                              -- Trigger a pause action in the specified by uniqueId boombox. The uniqueId is the config entry's key.
+    exports['cs-boombox']:Stop(uniqueId)                               -- Trigger a stop action in the specified by uniqueId boombox. The uniqueId is the config entry's key.
+    exports['cs-boombox']:IsPlaying(uniqueId)                          -- Returns whether an entry is playing in the specified by uniqueId boombox. The uniqueId is the config entry's key.
+    exports['cs-boombox']:SetLoop(uniqueId, state)                     -- Sets the player loop state of the specified by uniqueId boombox. The uniqueId is the config entry's key. The state is a boolean indicating the loop state.
 
-    exports['cs-boombox']:AddToQueue(                              -- Adds a new entry to the specified uniqueId's queue.
+    exports['cs-boombox']:AddToQueue(                              -- Adds a new entry to the specified by uniqueId boombox's queue.
         uniqueId,               -- The config entry's key.
         url,                -- The URL of the entry.
         thumbnailUrl,       -- The thumbnail URL of the entry.
@@ -149,10 +149,10 @@ end)
         duration            -- The duration of the entry (in seconds).
     )
 
-    exports['cs-boombox']:QueueNow(uniqueId, position)                 -- Queues an entry to the specified uniqueId's queue in the specified queue position. The uniqueId is the config entry's key.
-    exports['cs-boombox']:RemoveFromQueue(uniqueId, position)          -- Removes an entry from the specified uniqueId's queue in the specified queue position. The uniqueId is the config entry's key.
+    exports['cs-boombox']:QueueNow(uniqueId, position)                 -- Queues an entry to the specified by uniqueId boombox's queue in the specified queue position. The uniqueId is the config entry's key.
+    exports['cs-boombox']:RemoveFromQueue(uniqueId, position)          -- Removes an entry from the specified by uniqueId boombox's queue in the specified queue position. The uniqueId is the config entry's key.
 
-    exports['cs-boombox']:GetPlayer(uniqueId)                          -- Returns the entry in the player of the specified uniqueId in an object with the following data structure.
+    exports['cs-boombox']:GetPlayer(uniqueId)                          -- Returns the entry in the player of the specified by uniqueId boombox in an object with the following data structure.
                                                                 {
                                                                     playing,            -- Whether the player is playing or not.
                                                                     stopped,            -- Whether the player is stopped or not.
@@ -167,7 +167,7 @@ end)
                                                                     duration            -- The duration of the entry (in seconds) (as received via a client or an export). 
                                                                 }
 
-    exports['cs-boombox']:GetQueue(uniqueId)                           -- Returns the queue of the specified uniqueId in an array of objects with the following data structure for each object.
+    exports['cs-boombox']:GetQueue(uniqueId)                           -- Returns the queue of the specified by uniqueId boombox in an array of objects with the following data structure for each object.
                                                                 {
                                                                     url,                -- The URL of the entry (as received via a client or an export).
                                                                     thumbnailUrl,       -- The thumbnail URL of the entry (as received via a client or an export).
