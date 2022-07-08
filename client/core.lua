@@ -175,8 +175,6 @@ function MediaManagerInstance:createDui()
 
         self.browserHandle = CreateDui(duiUrl .. '?v=' .. resourceVersion .. '+' .. internalVersion .. (debugDui and '&debug=1' or '') .. '#' .. GetCurrentResourceName() .. '|' .. self.uuid, 1280, 720)
 
-        CreateRuntimeTextureFromDuiHandle(CreateRuntimeTxd('browser_' .. self.uuid), 'browserTexture_' .. self.uuid, GetDuiHandle(self.browserHandle))
-
         while ((not self.browserHandle) or (not IsDuiAvailable(self.browserHandle)) or (not nuiReady) or (not self.browserReady) or (not serverReady)) do
             if (self.destroyed or creationId ~= self.duiCreationId) then
                 break
