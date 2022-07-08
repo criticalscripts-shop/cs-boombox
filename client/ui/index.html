@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="css/libraries/noty.min.css">
+        <link rel="stylesheet" type="text/css" href="css/libraries/font-awesome.min.css">
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+        <script>['dragover', 'drop'].forEach(v => window.addEventListener(v, event => event.preventDefault(), false))</script>
+    </head>
+
+    <body style="display: none">
+        <div id="container">
+            <div id="loading"><i class="fas fa-spinner fa-spin"></i></div>
+    
+            <div id="top">
+                <div id="top-container">
+                    <div id="close"><i class="fas fa-times"></i></div>
+
+                    <div id="add-container">
+                        <input type="text" id="add-input" />
+                        <div id="add-button"><i class="fas fa-plus"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="queue"></div>
+            <div id="spinner"><i class="fas fa-spinner fa-spin"></i></div>
+
+            <div id="player">
+                <div id="seek-control"><span id="start-seek-text">00:00</span><input type="range" id="seek" min="0" max="0" value="0" step="1"><span id="end-seek-text">00:00</span></div>
+
+                <div id="player-container">
+                    <div id="media-info"><div id="media-image"></div><div id="media-title"></div></div>
+                    <div id="play-button" class="player-button"><i class="fas fa-play"></i></div>
+                    <div id="stop-button" class="player-button"><i class="fas fa-stop"></i></div>
+                    <div id="skip-button" class="player-button"><i class="fas fa-step-forward"></i></div>
+                    <div id="loop-button" class="player-button"><i class="fas fa-redo"></i></div>
+                    <div id="volume-control"><span id="volume-text">100%</span><input type="range" id="volume" min="0" max="150" value="100" step="1"></div>
+                </div>
+            </div>
+        </div>
+
+        <script src="nui://game/ui/jquery.js"></script>
+        <script>window.jQuery || document.write('<script src=\"javascript\/libraries\/jquery.min.js\"><\/script>')</script>
+        <script src="javascript/libraries/noty.min.js"></script>
+        <script src="javascript/libraries/tooltip.min.js"></script>
+        <script src="javascript/script.js"></script>
+    </body>
+</html>

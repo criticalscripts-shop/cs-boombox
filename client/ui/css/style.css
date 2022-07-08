@@ -1,0 +1,380 @@
+* {
+    outline: none !important;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+*::-webkit-scrollbar {
+	width: 0.5vw;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.85);
+}
+
+input[type=range] {
+    width: 100%;
+    background-color: transparent;
+    overflow: hidden;
+    -webkit-appearance: none;
+}
+
+input[type=range]:focus {
+    outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    border: 0;
+    height: 0.6vw;
+    width: 100%;
+    cursor: pointer;
+    -webkit-appearance: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    width: 0.6vw;
+    height: 0.6vw;
+    background: #d8d8d8;
+    cursor: pointer;
+    box-shadow: -500px 0 0 500px #666;
+    -webkit-appearance: none;
+    transition: all ease 0.25s;
+}
+
+input[type=range]:hover::-webkit-slider-thumb {
+    box-shadow: -510px 0 0 500px #ed163a;
+}
+
+input[type=range]::-webkit-slider-runnable-track, input[type=range]:focus::-webkit-slider-runnable-track {
+    background: rgba(50, 50, 50, 0.5);
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto';
+}
+
+#loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2vw;
+    color: white;
+    background-color: #151515;
+    z-index: 9999;
+}
+
+#container {
+    max-width: 1024px;
+    max-height: 768px;
+    top: 5%;
+    background: rgba(25, 25, 25, 0.75);
+    margin: 0 auto;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+#top {
+    width: 100%;
+}
+
+#top-container {
+    padding: 4% 4% 1% 4%;
+}
+
+#add-container {
+    width: 55%;
+    text-align: center;
+}
+
+#player {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+}
+
+#top-container, #player-container {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+#player-container {
+    justify-content: center;
+    position: relative;
+    background: #131313;
+}
+
+#media-info {
+    position: absolute;
+    min-width: 39%;
+    max-width: 39%;
+    left: 0;
+    color: white;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+#volume-control {
+    position: absolute;
+    right: 0;
+    color: white;
+    display: flex;
+    align-items: center;
+    text-align: right;
+    height: 100%;
+    margin: 0 1vw;
+}
+
+#volume-text {
+    background: #0e0e0e;
+    font-size: 0.5vw;
+    font-family: monospace;
+    padding: 0.25vw;
+    margin-right: 0.25vw;
+    width: 2vw;
+    text-align: center;
+}
+
+#media-image, #media-image img {
+    height: 100%;
+    display: inline-block;
+}
+
+#media-title {
+    position: relative;
+    color: white;
+    width: 100%;
+    font-size: 0.7em;
+    margin-left: 2%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+#media-title .icon {
+    position: absolute;
+    left: 0;
+    bottom: 0.05vw;
+}
+
+#add-input {
+    width: 80%;
+    height: 3.5%;
+    background: #4d4d4d;
+    border: none;
+    font-size: 125%;
+    color: white;
+    padding: 1% 1%;
+}
+
+#add-button {
+    font-size: 150%;
+    margin: 0.5% 2%;
+    position: relative;
+    top: 0.1vw;
+}
+
+#queue {
+    max-height: 75%;
+    height: 100%;
+    width: 75%;
+    margin: 0 auto;
+    overflow-x: auto;
+}
+
+.queue-element.fetching {
+    pointer-events: none;
+    font-size: 1vw;
+    color: white;
+}
+
+.queue-element {
+    display: flex;
+    margin-bottom: 0.5vw;
+    margin-left: 2vw;
+    margin-right: 2vw;
+    align-items: center;
+    justify-content: center;
+    background: rgb(50, 50, 50, 0.5);
+    position: relative;
+    height: 5vw;
+}
+
+.queue-element:last-child {
+    margin-bottom: 0;
+}
+
+.queue-element:hover {
+    background: rgba(75, 75, 75, 0.5);
+}
+
+.queue-element .queue-actions {
+    display: inline-block;
+    padding: 3% 5%;
+    width: 70%;
+    overflow: hidden;
+}
+
+.queue-element .queue-image {
+    width: 10vw;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.queue-element .queue-actions .queue-title {
+    color: #fff;
+    text-align: center;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 1vw;
+}
+
+.queue-element .queue-actions .queue-buttons {
+    color: #979797;
+    text-align: center;
+    transition: all ease 0.30s;
+    opacity: 0;
+    font-size: 0.8em;
+}
+
+.queue-element:hover .queue-actions .queue-buttons {
+    opacity: 1;
+}
+
+.queue-element .queue-actions .queue-buttons .queue-button:hover {
+    color: white;
+}
+
+.queue-element .queue-actions .queue-buttons .queue-button {
+    margin: 2% 5%;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.queue-element img {
+    display: inline-block;
+    width: 20%;
+    height: 20%;
+    margin: 1%;
+}
+
+.player-button, .control-button, #add-button {
+    display: inline-block;
+    color: white;
+    cursor: pointer;
+}
+
+.player-button {
+    font-size: 150%;
+    margin: 1%;
+}
+
+.control-button {
+    font-size: 135%;
+    margin: 5% 2%;
+    position: relative;
+    top: 0.05vw;
+}
+
+.control-button i:active, .player-button i:active {
+    transform: scale(0.85);
+}
+
+#noty_layout__bottomRight {
+    bottom: 1%;
+    right: 1%;
+    width: 20%;
+}
+
+.noty_theme__sunset.noty_bar .noty_body {
+    padding: 5%;
+    font-size: 0.75vw;
+}
+
+.tippy-box {
+    font-size: 85%;
+}
+
+.tippy-content {
+    background-color: rgba(75, 75, 75, 0.75);
+    text-shadow: 0 0 0.25vw #000;
+}
+
+.enabled {
+    color: #2fed16ce;
+}
+
+.disabled {
+    color: #ed163ab0;
+}
+
+#seek-control {
+    padding: 0.5vw 0;
+    position: absolute;
+    background: #131313;
+    width: 100%;
+}
+
+#start-seek-text, #end-seek-text {
+    width: 7%;
+    display: inline-block;
+    text-align: center;
+    margin: 0;
+    color: white;
+    font-size: 0.5vw;
+}
+
+#seek {
+    width: 86%;
+    margin: 0;
+    position: relative;
+    top: 0.1vw;
+}
+
+#close {
+    position: absolute;
+    top: 0.5vw;
+    right: 0.5vw;
+    font-size: 0.75vw;
+    color: #696969;
+}
+
+#close:hover {
+    color: #979797;
+}
+
+#spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 2vw;
+    color: white;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(29, 29, 29, 0.70);
+    z-index: 9999;
+    display: none;
+}
