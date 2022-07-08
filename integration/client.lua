@@ -4,21 +4,21 @@
 
 local uiAccessible = false
 local cesReady = false
-local lastAccessedUUID = nil
+local lastAccessedUniqueId = nil
 
 function CanAccessControllerInterface()
-    local uuid = nil -- TODO: Get UUID of closest boombox. (Temporary)
-    return (not lastAccessedUUID or uuid == lastAccessedUUID) and not IsEntityDead(PlayerPedId())
+    local uniqueId = nil -- TODO: Get UniqueId of closest boombox. (Temporary)
+    return (not lastAccessedUniqueId or uniqueId == lastAccessedUniqueId) and not IsEntityDead(PlayerPedId())
 end
 
 RegisterCommand('boombox', function ()
-    local uuid = nil -- TODO: Get UUID of closest boombox or create a UUID for the closest boombox and open the UI for it. (Temporary)
+    local uniqueId = nil -- TODO: Get UniqueId of closest boombox or create a UniqueId for the closest boombox and open the UI for it. (Temporary)
 
-    if (uiAccessible and uuid) then
-        lastAccessedUUID = uuid
-        TriggerServerEvent('cs-boombox:integration:toggleControllerInterface', uuid, model) -- TODO: Model: the config entry's key.
+    if (uiAccessible and uniqueId) then
+        lastAccessedUniqueId = uniqueId
+        TriggerServerEvent('cs-boombox:integration:toggleControllerInterface', uniqueId, model) -- TODO: Model: the config entry's key.
     else
-        lastAccessedUUID = nil
+        lastAccessedUniqueId = nil
     end
 end)
 
@@ -38,7 +38,7 @@ CreateThread(function()
             TriggerEvent('cs-boombox:setUiAccessible', uiAccessible)
 
             if (not uiAccessible) then
-                lastAccessedUUID = nil
+                lastAccessedUniqueId = nil
             end
         end
 

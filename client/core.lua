@@ -5,7 +5,7 @@ end
 
 local internalVersion = '1.0'
 
-local inRangeUUIDs = {}
+local inRangeUniqueIds = {}
 local inRangeObjects = {}
 local configModelToHash = {}
 local configHashToModel = {}
@@ -79,23 +79,23 @@ function RotationToDirection(rotation)
     return vector3(-math.sin(z) * abs, math.cos(z) * abs, math.sin(x))
 end
 
-function ShowUi(uuid)
+function ShowUi(uniqueId)
     if (not CanAccessUi()) then
         return
     end
 
-    uiEnabled = uuid
+    uiEnabled = uniqueId
 
     SetNuiFocus(true, true)
     SetNuiFocusKeepInput(true)
 
     SendNUIMessage({
         ['type'] = 'cs-boombox:show',
-        ['uuid'] = uuid
+        ['uniqueId'] = uniqueId
     })
 
     TriggerEvent('cs-boombox:onControllerInterfaceOpen')
-    TriggerServerEvent('cs-boombox:ui', uuid)
+    TriggerServerEvent('cs-boombox:ui', uniqueId)
 
     CreateThread(function()
         while (uiEnabled) do
@@ -140,7 +140,7 @@ function MediaManagerInstance:sync(data, temp)
 
         SendDuiMessage(self.browserHandle, json.encode({
             ['type'] = 'cs-boombox:sync',
-            ['uuid'] = self.uuid,
+            ['uniqueId'] = self.uniqueId,
             ['playing'] = data.playing,
             ['stopped'] = data.stopped,
             ['time'] = data.time,
@@ -173,7 +173,7 @@ function MediaManagerInstance:createDui()
             Wait(browserWaitMs)
         end
 
-        self.browserHandle = CreateDui(duiUrl .. '?v=' .. resourceVersion .. '+' .. internalVersion .. (debugDui and '&debug=1' or '') .. '#' .. GetCurrentResourceName() .. '|' .. self.uuid, 1280, 720)
+        self.browserHandle = CreateDui(duiUrl .. '?v=' .. resourceVersion .. '+' .. internalVersion .. (debugDui and '&debug=1' or '') .. '#' .. GetCurrentResourceName() .. '|' .. self.uniqueId, 1280, 720)
 
         while ((not self.browserHandle) or (not IsDuiAvailable(self.browserHandle)) or (not nuiReady) or (not self.browserReady) or (not serverReady)) do
             if (self.destroyed or creationId ~= self.duiCreationId) then
@@ -186,7 +186,7 @@ function MediaManagerInstance:createDui()
         if ((not self.destroyed) and creationId == self.duiCreationId) then
             SendDuiMessage(self.browserHandle, json.encode({
                 ['type'] = 'cs-boombox:create',
-                ['uuid'] = self.uuid
+                ['uniqueId'] = self.uniqueId
             }))
         end
 
@@ -198,7 +198,7 @@ function MediaManagerInstance:adjust(time)
     if (self.managerReady) then
         SendDuiMessage(self.browserHandle, json.encode({
             ['type'] = 'cs-boombox:adjust',
-            ['uuid'] = self.uuid,
+            ['uniqueId'] = self.uniqueId,
             ['time'] = time
         }))
     end
@@ -241,7 +241,7 @@ function MediaManagerInstance:updatePlayer(startPosition, playerUpVector, camera
 
     SendDuiMessage(self.browserHandle, json.encode({
         ['type'] = 'cs-boombox:update',
-        ['uuid'] = self.uuid,
+        ['uniqueId'] = self.uniqueId,
 
         ['listener'] = {
             ['up'] = {
@@ -308,7 +308,7 @@ function MediaManagerInstance:addSpeaker(options)
 
         SendDuiMessage(self.browserHandle, json.encode({
             ['type'] = 'cs-boombox:addSpeaker',
-            ['uuid'] = self.uuid,
+            ['uniqueId'] = self.uniqueId,
             ['speakerId'] = id,
             ['maxDistance'] = Ternary(options.maxDistance, config.models[self.model].range / 5),
             ['refDistance'] = Ternary(options.refDistance, config.models[self.model].range / 8),
@@ -336,12 +336,12 @@ function MediaManagerInstance:destroy()
     self:destroyDui()
 end
 
-function MediaManager(uuid, object, model)
+function MediaManager(uniqueId, object, model)
     local instance = {}
     
     setmetatable(instance, MediaManagerInstance)
 
-    instance.uuid = uuid
+    instance.uniqueId = uniqueId
     instance.object = object
     instance.model = model
     instance.serverSynced = false
@@ -363,31 +363,31 @@ function MediaManager(uuid, object, model)
 end
 
 RegisterNUICallback('browserReady', function(data, callback)
-    if (instances[data.uuid]) then
-        instances[data.uuid].manager:onBrowserReady()
+    if (instances[data.uniqueId]) then
+        instances[data.uniqueId].manager:onBrowserReady()
     end
 
     callback(true)
 end)
 
 RegisterNUICallback('synced', function(data, callback)
-    if (instances[data.uuid]) then
-        instances[data.uuid].manager:onSynced()
+    if (instances[data.uniqueId]) then
+        instances[data.uniqueId].manager:onSynced()
     end
 
     callback(true)
 end)
 
 RegisterNUICallback('managerReady', function(data, callback)
-    if (instances[data.uuid]) then
-        instances[data.uuid].manager:onManagerReady()
+    if (instances[data.uniqueId]) then
+        instances[data.uniqueId].manager:onManagerReady()
     end
 
     callback(true)
 end)
 
 RegisterNUICallback('controllerError', function(data, callback)
-    if (instances[data.uuid]) then
+    if (instances[data.uniqueId]) then
         if (uiEnabled) then
             local message = data.error
 
@@ -407,13 +407,13 @@ RegisterNUICallback('controllerError', function(data, callback)
 
             SendNUIMessage({
                 ['type'] = 'cs-boombox:error',
-                ['uuid'] = data.uuid,
+                ['uniqueId'] = data.uniqueId,
                 ['error'] = message
             })
         end
 
-        if (instances[data.uuid].isUpdater) then
-            TriggerServerEvent('cs-boombox:controllerError', data.uuid)
+        if (instances[data.uniqueId].isUpdater) then
+            TriggerServerEvent('cs-boombox:controllerError', data.uniqueId)
         end
     end
 
@@ -421,42 +421,42 @@ RegisterNUICallback('controllerError', function(data, callback)
 end)
 
 RegisterNUICallback('controllerEnded', function(data, callback)
-    if (instances[data.uuid] and instances[data.uuid].isUpdater) then
-        TriggerServerEvent('cs-boombox:controllerEnded', data.uuid)
+    if (instances[data.uniqueId] and instances[data.uniqueId].isUpdater) then
+        TriggerServerEvent('cs-boombox:controllerEnded', data.uniqueId)
     end
 
     callback(true)
 end)
 
 RegisterNUICallback('controllerResync', function(data, callback)
-    if (instances[data.uuid]) then
-        TriggerServerEvent('cs-boombox:resync', data.uuid, true)
+    if (instances[data.uniqueId]) then
+        TriggerServerEvent('cs-boombox:resync', data.uniqueId, true)
     end
 
     callback(true)
 end)
 
 RegisterNUICallback('controllerPlayingInfo', function(data, callback)
-    if (not instances[data.uuid]) then
+    if (not instances[data.uniqueId]) then
         return
     end
 
-    instances[data.uuid].controllerPlayingInfo.time = data.time
-    instances[data.uuid].controllerPlayingInfo.duration = data.duration
-    instances[data.uuid].controllerPlayingInfo.playing = data.playing
+    instances[data.uniqueId].controllerPlayingInfo.time = data.time
+    instances[data.uniqueId].controllerPlayingInfo.duration = data.duration
+    instances[data.uniqueId].controllerPlayingInfo.playing = data.playing
 
     SendNUIMessage({
         ['type'] = 'cs-boombox:info',
-        ['uuid'] = data.uuid,
-        ['time'] = instances[data.uuid].controllerPlayingInfo.time,
-        ['duration'] = instances[data.uuid].controllerPlayingInfo.duration
+        ['uniqueId'] = data.uniqueId,
+        ['time'] = instances[data.uniqueId].controllerPlayingInfo.time,
+        ['duration'] = instances[data.uniqueId].controllerPlayingInfo.duration
     })
 
-    if (instances[data.uuid].controllerPlayingInfo.duration and instances[data.uuid].controllerPlayingInfo.duration ~= instances[data.uuid].lastSeenDuration) then
-        instances[data.uuid].lastSeenDuration = instances[data.uuid].controllerPlayingInfo.duration
+    if (instances[data.uniqueId].controllerPlayingInfo.duration and instances[data.uniqueId].controllerPlayingInfo.duration ~= instances[data.uniqueId].lastSeenDuration) then
+        instances[data.uniqueId].lastSeenDuration = instances[data.uniqueId].controllerPlayingInfo.duration
 
-        if (instances[data.uuid].isUpdater) then
-            TriggerServerEvent('cs-boombox:duration', data.uuid, instances[data.uuid].controllerPlayingInfo.duration)
+        if (instances[data.uniqueId].isUpdater) then
+            TriggerServerEvent('cs-boombox:duration', data.uniqueId, instances[data.uniqueId].controllerPlayingInfo.duration)
         end
     end
 
@@ -464,78 +464,78 @@ RegisterNUICallback('controllerPlayingInfo', function(data, callback)
 end)
 
 RegisterNUICallback('controllerSeeked', function(data, callback)
-    if (not instances[data.uuid]) then
+    if (not instances[data.uniqueId]) then
         return
     end
 
     SendNUIMessage({
         ['type'] = 'cs-boombox:seeked',
-        ['uuid'] = data.uuid
+        ['uniqueId'] = data.uniqueId
     })
 
     callback(true)
 end)
 
 RegisterNUICallback('urlAdded', function(data, callback)
-    TriggerServerEvent('cs-boombox:addToQueue', data.uuid, data.url, data.thumbnailUrl, data.thumbnailTitle or false, data.title, data.icon or false)
+    TriggerServerEvent('cs-boombox:addToQueue', data.uniqueId, data.url, data.thumbnailUrl, data.thumbnailTitle or false, data.title, data.icon or false)
     callback(true)
 end)
 
 RegisterNUICallback('playerPaused', function (data, callback)
-    TriggerServerEvent('cs-boombox:pause', data.uuid)
+    TriggerServerEvent('cs-boombox:pause', data.uniqueId)
     callback(true)
 end)
 
 RegisterNUICallback('playerPlayed', function (data, callback)
-    TriggerServerEvent('cs-boombox:play', data.uuid)
+    TriggerServerEvent('cs-boombox:play', data.uniqueId)
     callback(true)
 end)
 
 RegisterNUICallback('playerStopped', function (data, callback)
-    TriggerServerEvent('cs-boombox:stop', data.uuid)
+    TriggerServerEvent('cs-boombox:stop', data.uniqueId)
     callback(true)
 end)
 
 RegisterNUICallback('playerSkipped', function (data, callback)
-    TriggerServerEvent('cs-boombox:nextQueueSong', data.uuid)
+    TriggerServerEvent('cs-boombox:nextQueueSong', data.uniqueId)
     callback(true)
 end)
 
 RegisterNUICallback('playerLooped', function (data, callback)
-    TriggerServerEvent('cs-boombox:toggleLoop', data.uuid)
+    TriggerServerEvent('cs-boombox:toggleLoop', data.uniqueId)
     callback(true)
 end)
 
 RegisterNUICallback('changeVolume', function (data, callback)
-    TriggerServerEvent('cs-boombox:changeVolume', data.uuid, data.value)
+    TriggerServerEvent('cs-boombox:changeVolume', data.uniqueId, data.value)
     callback(true)
 end)
 
 RegisterNUICallback('seek', function (data, callback)
-    if (instances[data.uuid]) then
-        TriggerServerEvent('cs-boombox:seek', data.uuid, Ternary(instances[data.uuid].controllerPlayingInfo.duration and instances[data.uuid].controllerPlayingInfo.duration > 0 and data.value > instances[data.uuid].controllerPlayingInfo.duration, instances[data.uuid].controllerPlayingInfo.duration - 0.5, data.value))
+    if (instances[data.uniqueId]) then
+        TriggerServerEvent('cs-boombox:seek', data.uniqueId, Ternary(instances[data.uniqueId].controllerPlayingInfo.duration and instances[data.uniqueId].controllerPlayingInfo.duration > 0 and data.value > instances[data.uniqueId].controllerPlayingInfo.duration, instances[data.uniqueId].controllerPlayingInfo.duration - 0.5, data.value))
     end
 
     callback(true)
 end)
 
 RegisterNUICallback('queueNow', function (data, callback)
-    TriggerServerEvent('cs-boombox:queueNow', data.uuid, data.index)
+    TriggerServerEvent('cs-boombox:queueNow', data.uniqueId, data.index)
     callback(true)
 end)
 
 RegisterNUICallback('queueNext', function (data, callback)
-    TriggerServerEvent('cs-boombox:queueNext', data.uuid, data.index)
+    TriggerServerEvent('cs-boombox:queueNext', data.uniqueId, data.index)
     callback(true)
 end)
 
 RegisterNUICallback('queueRemove', function (data, callback)
-    TriggerServerEvent('cs-boombox:queueRemove', data.uuid, data.index)
+    TriggerServerEvent('cs-boombox:queueRemove', data.uniqueId, data.index)
     callback(true)
 end)
 
 RegisterNUICallback('toggleSetting', function (data, callback)
-    TriggerServerEvent('cs-boombox:toggleSetting', data.uuid, data.key)
+    TriggerServerEvent('cs-boombox:toggleSetting', data.uniqueId, data.key)
     callback(true)
 end)
 
@@ -572,33 +572,33 @@ RegisterNUICallback('nuiReady', function(data, callback)
     callback(true)
 end)
 
-RegisterNetEvent('cs-boombox:cui', function(uuid, hideOnly)
+RegisterNetEvent('cs-boombox:cui', function(uniqueId, hideOnly)
     if (uiEnabled) then
         HideUi()
     elseif (not hideOnly) then
-        ShowUi(uuid)
+        ShowUi(uniqueId)
     end
 end)
 
-RegisterNetEvent('cs-boombox:updater', function(uuid, status)
-    if (not instances[uuid]) then
+RegisterNetEvent('cs-boombox:updater', function(uniqueId, status)
+    if (not instances[uniqueId]) then
         return
     end
 
-    instances[uuid].isUpdater = status
+    instances[uniqueId].isUpdater = status
 end)
 
-RegisterNetEvent('cs-boombox:controller', function(uuid, status)
-    if (instances[uuid]) then
-        instances[uuid].isController = status
+RegisterNetEvent('cs-boombox:controller', function(uniqueId, status)
+    if (instances[uniqueId]) then
+        instances[uniqueId].isController = status
     end
 end)
 
-RegisterNetEvent('cs-boombox:queue', function(uuid, queue)
-    if (instances[uuid]) then
+RegisterNetEvent('cs-boombox:queue', function(uniqueId, queue)
+    if (instances[uniqueId]) then
         SendNUIMessage({
             ['type'] = 'cs-boombox:queue',
-            ['uuid'] = uuid,
+            ['uniqueId'] = uniqueId,
             ['queue'] = queue
         })
     end
@@ -614,30 +614,30 @@ RegisterNetEvent('cs-boombox:params', function(url, version)
     paramsReady = true
 end)
 
-RegisterNetEvent('cs-boombox:sync', function(uuid, data, temp)
-    if (instances[uuid]) then
+RegisterNetEvent('cs-boombox:sync', function(uniqueId, data, temp)
+    if (instances[uniqueId]) then
         SendNUIMessage({
             ['type'] = 'cs-boombox:sync',
-            ['uuid'] = uuid,
+            ['uniqueId'] = uniqueId,
             ['media'] = data.media
         })
 
-        if (instances[uuid].isUpdater and data.media.duration and data.media.duration > 0 and Round(data.media.time) ~= Round(instances[uuid].controllerPlayingInfo.time)) then
-            instances[uuid].lastUpdatedTime = instances[uuid].controllerPlayingInfo.time
-            TriggerServerEvent('cs-boombox:time', uuid, instances[uuid].controllerPlayingInfo.time, true)
+        if (instances[uniqueId].isUpdater and data.media.duration and data.media.duration > 0 and Round(data.media.time) ~= Round(instances[uniqueId].controllerPlayingInfo.time)) then
+            instances[uniqueId].lastUpdatedTime = instances[uniqueId].controllerPlayingInfo.time
+            TriggerServerEvent('cs-boombox:time', uniqueId, instances[uniqueId].controllerPlayingInfo.time, true)
         end
 
         if (data.media.stopped) then
-            instances[uuid].lastSeenDuration = nil
+            instances[uniqueId].lastSeenDuration = nil
         end
 
-        instances[uuid].manager:sync(data.media, temp)
+        instances[uniqueId].manager:sync(data.media, temp)
     end
 end)
 
-RegisterNetEvent('cs-boombox:adjust', function(uuid, time)
-    if (instances[uuid]) then
-        instances[uuid].manager:adjust(time)
+RegisterNetEvent('cs-boombox:adjust', function(uniqueId, time)
+    if (instances[uniqueId]) then
+        instances[uniqueId].manager:adjust(time)
     end
 end)
 
@@ -645,12 +645,12 @@ AddEventHandler('cs-boombox:setUiAccessible', function(state)
     uiAccessible = state
 end)
 
-AddEventHandler('cs-boombox:objectInRange', function(object, uuid, model)
-    if (instances[uuid]) then
+AddEventHandler('cs-boombox:objectInRange', function(object, uniqueId, model)
+    if (instances[uniqueId]) then
         return
     end
 
-    instances[uuid] = {
+    instances[uniqueId] = {
         ['lastUpdatedTime'] = nil,
         ['lastSeenDuration'] = nil,
 
@@ -662,19 +662,19 @@ AddEventHandler('cs-boombox:objectInRange', function(object, uuid, model)
         },
 
         ['model'] = model,
-        ['manager'] = MediaManager(uuid, object, model)
+        ['manager'] = MediaManager(uniqueId, object, model)
     }
 end)
 
-AddEventHandler('cs-boombox:objectOutOfRange', function(object, uuid)
-    if (not instances[uuid]) then
+AddEventHandler('cs-boombox:objectOutOfRange', function(object, uniqueId)
+    if (not instances[uniqueId]) then
         return
     end
 
-    instances[uuid].manager:destroy()
-    instances[uuid] = nil
+    instances[uniqueId].manager:destroy()
+    instances[uniqueId] = nil
 
-    TriggerServerEvent('cs-boombox:leftSyncUUID', uuid)
+    TriggerServerEvent('cs-boombox:leftSyncUniqueId', uniqueId)
 end)
 
 AddEventHandler('onResourceStop', function(resource)
@@ -700,9 +700,9 @@ CreateThread(function()
         for object in EnumerateEntities(FindFirstObject, FindNextObject, EndFindObject) do
             if (DoesEntityExist(object) and (not HasObjectBeenBroken(object))) then
                 -- TODO: Enumerate and create boomboxes
-                local uuid = nil -- TODO: Get boombox UUID.
+                local uniqueId = nil -- TODO: Get boombox UniqueId.
 
-                if (not inRangeUUIDs[uuid]) then
+                if (not inRangeUniqueIds[uniqueId]) then
                     if (inRangeObjects[object]) then
                         TriggerEvent('cs-boombox:objectOutOfRange', object, inRangeObjects[object])
                         inRangeObjects[object] = nil
@@ -712,22 +712,22 @@ CreateThread(function()
                         local modelKey = configHashToModel[model]
 
                         if (config.models[model].enabled and (#(coords - position) <= config.models[model].range)) then
-                            inRangeUUIDs[uuid] = object
-                            inRangeObjects[object] = uuid
-                            TriggerEvent('cs-boombox:objectInRange', object, uuid, modelKey)
+                            inRangeUniqueIds[uniqueId] = object
+                            inRangeObjects[object] = uniqueId
+                            TriggerEvent('cs-boombox:objectInRange', object, uniqueId, modelKey)
                         end
                     end
-                elseif (inRangeUUIDs[uuid] ~= object and inRangeObjects[object]) then
+                elseif (inRangeUniqueIds[uniqueId] ~= object and inRangeObjects[object]) then
                     TriggerEvent('cs-boombox:objectOutOfRange', object, inRangeObjects[object])
                     inRangeObjects[object] = nil
                 end
             end
         end
 
-        for k, v in pairs(inRangeUUIDs) do
+        for k, v in pairs(inRangeUniqueIds) do
             if ((not DoesEntityExist(v)) or HasObjectBeenBroken(v, false) or (#(coords - GetEntityCoords(v)) > config.models[model].range)) then
                 TriggerEvent('cs-boombox:objectOutOfRange', v, k)
-                inRangeUUIDs[k] = nil
+                inRangeUniqueIds[k] = nil
                 inRangeObjects[v] = nil
             end
         end
@@ -780,10 +780,10 @@ CreateThread(function()
 
                     if (uiAccessible and (not instances[k].manager.serverSynced)) then
                         instances[k].manager.serverSynced = true
-                        TriggerServerEvent('cs-boombox:enteredSyncUUID', k, instances[k].model)
+                        TriggerServerEvent('cs-boombox:enteredSyncUniqueId', k, instances[k].model)
                     elseif ((not uiAccessible) and instances[k].manager.serverSynced) then
                         instances[k].manager.serverSynced = false
-                        TriggerServerEvent('cs-boombox:leftSyncUUID', k)
+                        TriggerServerEvent('cs-boombox:leftSyncUniqueId', k)
                     end
                 end
             end

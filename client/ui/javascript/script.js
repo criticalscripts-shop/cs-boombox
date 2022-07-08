@@ -5,7 +5,7 @@ let playing = false
 let stopped = false
 let seekHiding = false
 let lastUrl = null
-let currentUUID = null
+let currentUniqueId = null
 
 const urlCheckElement = document.createElement('input')
 
@@ -79,14 +79,14 @@ const ready = lang => {
             fetch(`https://${GetParentResourceName()}/playerPlayed`, {
                 method: 'POST',
                 body: JSON.stringify({
-                    uuid: currentUUID
+                    uniqueId: currentUniqueId
                 })
             }).catch(() => {})
         else
             fetch(`https://${GetParentResourceName()}/playerPaused`, {
                 method: 'POST',
                 body: JSON.stringify({
-                    uuid: currentUUID
+                    uniqueId: currentUniqueId
                 })
             }).catch(() => {})
     })
@@ -100,7 +100,7 @@ const ready = lang => {
         fetch(`https://${GetParentResourceName()}/playerStopped`, {
             method: 'POST',
             body: JSON.stringify({
-                uuid: currentUUID
+                uniqueId: currentUniqueId
             })
         }).catch(() => {})
     })
@@ -115,7 +115,7 @@ const ready = lang => {
         fetch(`https://${GetParentResourceName()}/playerSkipped`, {
             method: 'POST',
             body: JSON.stringify({
-                uuid: currentUUID
+                uniqueId: currentUniqueId
             })
         }).catch(() => {})
     })
@@ -129,7 +129,7 @@ const ready = lang => {
         fetch(`https://${GetParentResourceName()}/playerLooped`, {
             method: 'POST',
             body: JSON.stringify({
-                uuid: currentUUID
+                uniqueId: currentUniqueId
             })
         }).catch(() => {})
     })
@@ -167,7 +167,7 @@ const ready = lang => {
                     fetch(`https://${GetParentResourceName()}/urlAdded`, {
                         method: 'POST',
                         body: JSON.stringify({
-                            uuid: currentUUID,
+                            uniqueId: currentUniqueId,
                             thumbnailUrl: $('<div />').text(data.thumbnail_url).text(),
                             thumbnailTitle: $('<div />').text(data.author_name).text(),
                             title: $('<div />').text(data.title).text(),
@@ -214,7 +214,7 @@ const ready = lang => {
                 fetch(`https://${GetParentResourceName()}/urlAdded`, {
                     method: 'POST',
                     body: JSON.stringify({
-                        uuid: currentUUID,
+                        uniqueId: currentUniqueId,
                         thumbnailUrl: $('<div />').text(previewImage).text(),
                         thumbnailTitle: channelName,
                         title: liveTitle,
@@ -260,7 +260,7 @@ const ready = lang => {
                 fetch(`https://${GetParentResourceName()}/urlAdded`, {
                     method: 'POST',
                     body: JSON.stringify({
-                        uuid: currentUUID,
+                        uniqueId: currentUniqueId,
                         thumbnailUrl: $('<div />').text(previewImage).text(),
                         thumbnailTitle: channelName,
                         title: $('<div />').text(videoTitle).text(),
@@ -287,7 +287,7 @@ const ready = lang => {
                 fetch(`https://${GetParentResourceName()}/urlAdded`, {
                     method: 'POST',
                     body: JSON.stringify({
-                        uuid: currentUUID,
+                        uniqueId: currentUniqueId,
                         thumbnailUrl: $('<div />').text(metaOgImageQs ? metaOgImageQs.getAttribute('content') : '/client/ui/images/frame.svg').text(),
                         thumbnailTitle: lang.twitchClip,
                         title: (twitchClip[1] || twitchClip[2]),
@@ -325,7 +325,7 @@ const ready = lang => {
         fetch(`https://${GetParentResourceName()}/changeVolume`, {
             method: 'POST',
             body: JSON.stringify({
-                uuid: currentUUID,
+                uniqueId: currentUniqueId,
                 value: parseInt(elements.volume.val())
             })
         }).catch(() => {})
@@ -351,7 +351,7 @@ const ready = lang => {
         fetch(`https://${GetParentResourceName()}/seek`, {
             method: 'POST',
             body: JSON.stringify({
-                uuid: currentUUID,
+                uniqueId: currentUniqueId,
                 value: parseInt(elements.seek.val())
             })
         }).catch(() => {})
@@ -360,7 +360,7 @@ const ready = lang => {
     elements.close.on('click', () => fetch(`https://${GetParentResourceName()}/hideUi`, {
         method: 'POST',
         body: JSON.stringify({
-            uuid: currentUUID
+            uniqueId: currentUniqueId
         })
     }).catch(() => {}))
 
@@ -374,7 +374,7 @@ const ready = lang => {
         fetch(`https://${GetParentResourceName()}/queueNow`, {
             method: 'POST',
             body: JSON.stringify({
-                uuid: currentUUID,
+                uniqueId: currentUniqueId,
                 index: parseInt($(e.currentTarget).parents('.queue-element:first').attr('data-index'))
             })
         }).catch(() => {})
@@ -389,7 +389,7 @@ const ready = lang => {
         fetch(`https://${GetParentResourceName()}/queueNext`, {
             method: 'POST',
             body: JSON.stringify({
-                uuid: currentUUID,
+                uniqueId: currentUniqueId,
                 index: parseInt($(e.currentTarget).parents('.queue-element:first').attr('data-index'))
             })
         }).catch(() => {})
@@ -404,7 +404,7 @@ const ready = lang => {
         fetch(`https://${GetParentResourceName()}/queueRemove`, {
             method: 'POST',
             body: JSON.stringify({
-                uuid: currentUUID,
+                uniqueId: currentUniqueId,
                 index: parseInt($(e.currentTarget).parents('.queue-element:first').attr('data-index'))
             })
         }).catch(() => {})
@@ -427,7 +427,7 @@ const ready = lang => {
 
                 pendingSync = true
                 pendingQueue = true
-                currentUUID = e.data.uuid
+                currentUniqueId = e.data.uniqueId
 
                 $('body').show()
 
@@ -440,12 +440,12 @@ const ready = lang => {
                 break
 
             case 'cs-boombox:hide':
-                currentUUID = null
+                currentUniqueId = null
                 $('body').hide()
                 break
 
             case 'cs-boombox:sync':
-                if (e.data.uuid !== currentUUID)
+                if (e.data.uniqueId !== currentUniqueId)
                     return
 
                 playing = e.data.media.playing
@@ -529,7 +529,7 @@ const ready = lang => {
                 break
 
             case 'cs-boombox:info':
-                if (e.data.uuid !== currentUUID)
+                if (e.data.uniqueId !== currentUniqueId)
                     return
 
                 if (pendingSeek || seekHiding)
@@ -572,7 +572,7 @@ const ready = lang => {
                 break
 
             case 'cs-boombox:seeked':
-                if (e.data.uuid !== currentUUID)
+                if (e.data.uniqueId !== currentUniqueId)
                     return
 
                 pendingSeek = false
@@ -581,7 +581,7 @@ const ready = lang => {
                 break
 
             case 'cs-boombox:queue':
-                if (e.data.uuid !== currentUUID)
+                if (e.data.uniqueId !== currentUniqueId)
                     return
 
                 elements.queue.html('')
@@ -605,7 +605,7 @@ const ready = lang => {
                 break
 
             case 'cs-boombox:error':
-                if (e.data.uuid !== currentUUID)
+                if (e.data.uniqueId !== currentUniqueId)
                     return
 
                 notify(e.data.error, 'error')
@@ -624,7 +624,7 @@ const ready = lang => {
                 fetch(`https://${GetParentResourceName()}/hideUi`, {
                     method: 'POST',
                     body: JSON.stringify({
-                        uuid: currentUUID
+                        uniqueId: currentUniqueId
                     })
                 }).catch(() => {})
 
@@ -635,7 +635,7 @@ const ready = lang => {
                     fetch(`https://${GetParentResourceName()}/hideUi`, {
                         method: 'POST',
                         body: JSON.stringify({
-                            uuid: currentUUID
+                            uniqueId: currentUniqueId
                         })
                     }).catch(() => {})
 

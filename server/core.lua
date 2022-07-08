@@ -34,210 +34,210 @@ local players = {}
 local controllers = {}
 local data = {}
 
-function IsAllowedToUpdate(uuid, source)
-    return data[uuid].updater == source
+function IsAllowedToUpdate(uniqueId, source)
+    return data[uniqueId].updater == source
 end
 
-function IsAllowedToControl(uuid, source)
-    return controllers[source] == uuid
+function IsAllowedToControl(uniqueId, source)
+    return controllers[source] == uniqueId
 end
 
-function ClearController(uuid)
-    if (data[uuid].controller and GetPlayerEndpoint(data[uuid].controller)) then
-        TriggerClientEvent('cs-boombox:controller', data[uuid].controller, uuid, false)
+function ClearController(uniqueId)
+    if (data[uniqueId].controller and GetPlayerEndpoint(data[uniqueId].controller)) then
+        TriggerClientEvent('cs-boombox:controller', data[uniqueId].controller, uniqueId, false)
     end
 
-    data[uuid].controller = nil
+    data[uniqueId].controller = nil
 end
 
-function SetController(uuid, source)
-    data[uuid].controller = source
-    TriggerClientEvent('cs-boombox:controller', data[uuid].controller, uuid, true)
+function SetController(uniqueId, source)
+    data[uniqueId].controller = source
+    TriggerClientEvent('cs-boombox:controller', data[uniqueId].controller, uniqueId, true)
 end
 
-function RefreshCurrentUpdater(uuid)
-    if (data[uuid].updater and GetPlayerEndpoint(data[uuid].updater)) then
-        TriggerClientEvent('cs-boombox:updater', data[uuid].updater, uuid, false)
+function RefreshCurrentUpdater(uniqueId)
+    if (data[uniqueId].updater and GetPlayerEndpoint(data[uniqueId].updater)) then
+        TriggerClientEvent('cs-boombox:updater', data[uniqueId].updater, uniqueId, false)
     end
 
-    data[uuid].updater = nil
+    data[uniqueId].updater = nil
  
-    if (data[uuid].controller and players[data[uuid].controller] and Contains(uuid, players[data[uuid].controller])) then
-        data[uuid].updater = data[uuid].controller
+    if (data[uniqueId].controller and players[data[uniqueId].controller] and Contains(uniqueId, players[data[uniqueId].controller])) then
+        data[uniqueId].updater = data[uniqueId].controller
     else
         for k, v in pairs(players) do
-            if (Contains(uuid, v)) then
-                data[uuid].updater = k
+            if (Contains(uniqueId, v)) then
+                data[uniqueId].updater = k
                 break
             end
         end
     end
 
-    if (data[uuid].updater) then
-        TriggerClientEvent('cs-boombox:updater', data[uuid].updater, uuid, true)
+    if (data[uniqueId].updater) then
+        TriggerClientEvent('cs-boombox:updater', data[uniqueId].updater, uniqueId, true)
     end
 end
 
-function SyncQueue(uuid, target, temp)
-    if (not queue[uuid]) then
-        queue[uuid] = {}
+function SyncQueue(uniqueId, target, temp)
+    if (not queue[uniqueId]) then
+        queue[uniqueId] = {}
     end
 
     if (target) then
-        TriggerClientEvent('cs-boombox:queue', target, uuid, queue[uuid])
+        TriggerClientEvent('cs-boombox:queue', target, uniqueId, queue[uniqueId])
     else
         for k, v in pairs(players) do
-            if (Contains(uuid, v)) then
-                TriggerClientEvent('cs-boombox:queue', k, uuid, queue[uuid])
+            if (Contains(uniqueId, v)) then
+                TriggerClientEvent('cs-boombox:queue', k, uniqueId, queue[uniqueId])
             end
         end
     end
 end
 
-function SyncData(uuid, target, temp)
+function SyncData(uniqueId, target, temp)
     if (target) then
-        TriggerClientEvent('cs-boombox:sync', target, uuid, data[uuid], temp or {})
+        TriggerClientEvent('cs-boombox:sync', target, uniqueId, data[uniqueId], temp or {})
     else
         for k, v in pairs(players) do
-            if (Contains(uuid, v)) then
-                TriggerClientEvent('cs-boombox:sync', k, uuid, data[uuid], temp or {})
+            if (Contains(uniqueId, v)) then
+                TriggerClientEvent('cs-boombox:sync', k, uniqueId, data[uniqueId], temp or {})
             end
         end
     end
 end
 
-function AdjustTime(uuid)
+function AdjustTime(uniqueId)
     for k, v in pairs(players) do
-        if (Contains(uuid, v)) then
-            TriggerClientEvent('cs-boombox:adjust', k, data[uuid].time)
+        if (Contains(uniqueId, v)) then
+            TriggerClientEvent('cs-boombox:adjust', k, data[uniqueId].time)
         end
     end
 end
 
-RegisterNetEvent('cs-boombox:play', function(uuid, uiOpen)
+RegisterNetEvent('cs-boombox:play', function(uniqueId, uiOpen)
     local source = source
 
-    if (data[uuid] and IsAllowedToControl(uuid, source)) then
-        SetController(uuid, source)
+    if (data[uniqueId] and IsAllowedToControl(uniqueId, source)) then
+        SetController(uniqueId, source)
 
-        if (data[uuid].updater ~= data[uuid].controller) then
-            RefreshCurrentUpdater(uuid)
+        if (data[uniqueId].updater ~= data[uniqueId].controller) then
+            RefreshCurrentUpdater(uniqueId)
         end
 
         local force = false
 
-        if ((#queue[uuid] > 0) and (not data[uuid].media.url)) then
-            local q = queue[uuid][1]
+        if ((#queue[uniqueId] > 0) and (not data[uniqueId].media.url)) then
+            local q = queue[uniqueId][1]
 
-            table.remove(queue[uuid], 1)
+            table.remove(queue[uniqueId], 1)
 
-            if (data[uuid].media.url ~= q.url) then
-                data[uuid].media.duration = q.duration
+            if (data[uniqueId].media.url ~= q.url) then
+                data[uniqueId].media.duration = q.duration
             end
 
-            data[uuid].media.url = q.url
-            data[uuid].media.thumbnailUrl = q.thumbnailUrl
-            data[uuid].media.thumbnailTitle = q.thumbnailTitle
-            data[uuid].media.title = q.title
-            data[uuid].media.icon = q.icon
-            data[uuid].media.time = 0
+            data[uniqueId].media.url = q.url
+            data[uniqueId].media.thumbnailUrl = q.thumbnailUrl
+            data[uniqueId].media.thumbnailTitle = q.thumbnailTitle
+            data[uniqueId].media.title = q.title
+            data[uniqueId].media.icon = q.icon
+            data[uniqueId].media.time = 0
 
             force = true
         end
 
-        if (data[uuid].media.url and (not data[uuid].media.playing)) then
-            data[uuid].media.playing = true
-            data[uuid].media.stopped = false
+        if (data[uniqueId].media.url and (not data[uniqueId].media.playing)) then
+            data[uniqueId].media.playing = true
+            data[uniqueId].media.stopped = false
         end
 
-        TriggerEvent('cs-boombox:onPlay', uuid, source, {
-            ['url'] = data[uuid].media.url,
-            ['thumbnailUrl'] = data[uuid].media.thumbnailUrl,
-            ['thumbnailTitle'] = data[uuid].media.thumbnailTitle,
-            ['title'] = data[uuid].media.title,
-            ['icon'] = data[uuid].media.icon
+        TriggerEvent('cs-boombox:onPlay', uniqueId, source, {
+            ['url'] = data[uniqueId].media.url,
+            ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
+            ['thumbnailTitle'] = data[uniqueId].media.thumbnailTitle,
+            ['title'] = data[uniqueId].media.title,
+            ['icon'] = data[uniqueId].media.icon
         })
 
-        SyncQueue(uuid)
+        SyncQueue(uniqueId)
 
-        SyncData(uuid, nil, {
+        SyncData(uniqueId, nil, {
             ['force'] = force
         })
     end
 end)
 
-RegisterNetEvent('cs-boombox:pause', function(uuid, uiOpen)
+RegisterNetEvent('cs-boombox:pause', function(uniqueId, uiOpen)
     local source = source
 
-    if (data[uuid] and IsAllowedToControl(uuid, source)) then
-        SetController(uuid, source)
+    if (data[uniqueId] and IsAllowedToControl(uniqueId, source)) then
+        SetController(uniqueId, source)
 
-        if (data[uuid].updater ~= data[uuid].controller) then
-            RefreshCurrentUpdater(uuid)
+        if (data[uniqueId].updater ~= data[uniqueId].controller) then
+            RefreshCurrentUpdater(uniqueId)
         end
 
-        if (data[uuid].media.playing) then
-            data[uuid].media.playing = false
+        if (data[uniqueId].media.playing) then
+            data[uniqueId].media.playing = false
         end
 
-        TriggerEvent('cs-boombox:onPause', uuid, source, {
-            ['url'] = data[uuid].media.url,
-            ['thumbnailUrl'] = data[uuid].media.thumbnailUrl,
-            ['thumbnailTitle'] = data[uuid].media.thumbnailTitle,
-            ['title'] = data[uuid].media.title,
-            ['icon'] = data[uuid].media.icon
+        TriggerEvent('cs-boombox:onPause', uniqueId, source, {
+            ['url'] = data[uniqueId].media.url,
+            ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
+            ['thumbnailTitle'] = data[uniqueId].media.thumbnailTitle,
+            ['title'] = data[uniqueId].media.title,
+            ['icon'] = data[uniqueId].media.icon
         })
 
-        SyncData(uuid)
+        SyncData(uniqueId)
     end
 end)
 
-RegisterNetEvent('cs-boombox:stop', function(uuid, uiOpen)
+RegisterNetEvent('cs-boombox:stop', function(uniqueId, uiOpen)
     local source = source
 
-    if (data[uuid] and IsAllowedToControl(uuid, source)) then
-        SetController(uuid, source)
+    if (data[uniqueId] and IsAllowedToControl(uniqueId, source)) then
+        SetController(uniqueId, source)
 
-        if (data[uuid].updater ~= data[uuid].controller) then
-            RefreshCurrentUpdater(uuid)
+        if (data[uniqueId].updater ~= data[uniqueId].controller) then
+            RefreshCurrentUpdater(uniqueId)
         end
 
-        if (data[uuid].media.playing) then
-            TriggerEvent('cs-boombox:onStop', uuid, source, {
-                ['url'] = data[uuid].media.url,
-                ['thumbnailUrl'] = data[uuid].media.thumbnailUrl,
-                ['thumbnailTitle'] = data[uuid].media.thumbnailTitle,
-                ['title'] = data[uuid].media.title,
-                ['icon'] = data[uuid].media.icon
+        if (data[uniqueId].media.playing) then
+            TriggerEvent('cs-boombox:onStop', uniqueId, source, {
+                ['url'] = data[uniqueId].media.url,
+                ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
+                ['thumbnailTitle'] = data[uniqueId].media.thumbnailTitle,
+                ['title'] = data[uniqueId].media.title,
+                ['icon'] = data[uniqueId].media.icon
             })
         end
 
-        data[uuid].media.playing = false
-        data[uuid].media.stopped = true
-        data[uuid].media.time = 0
-        data[uuid].media.duration = nil
+        data[uniqueId].media.playing = false
+        data[uniqueId].media.stopped = true
+        data[uniqueId].media.time = 0
+        data[uniqueId].media.duration = nil
 
-        SyncData(uuid, nil, {
+        SyncData(uniqueId, nil, {
             ['force'] = true
         })
     end
 end)
 
-RegisterNetEvent('cs-boombox:seek', function(uuid, time)
+RegisterNetEvent('cs-boombox:seek', function(uniqueId, time)
     local source = source
 
-    if (data[uuid] and IsAllowedToControl(uuid, source)) then
-        if (data[uuid].media.duration and data[uuid].media.duration > 0) then
-            SetController(uuid, source)
+    if (data[uniqueId] and IsAllowedToControl(uniqueId, source)) then
+        if (data[uniqueId].media.duration and data[uniqueId].media.duration > 0) then
+            SetController(uniqueId, source)
     
-            if (data[uuid].updater ~= data[uuid].controller) then
-                RefreshCurrentUpdater(uuid)
+            if (data[uniqueId].updater ~= data[uniqueId].controller) then
+                RefreshCurrentUpdater(uniqueId)
             end
     
-            if (data[uuid].media.url) then
-                data[uuid].media.time = time
+            if (data[uniqueId].media.url) then
+                data[uniqueId].media.time = time
     
-                SyncData(uuid, nil, {
+                SyncData(uniqueId, nil, {
                     ['media'] = {
                         ['seek'] = true
                     }
@@ -247,61 +247,61 @@ RegisterNetEvent('cs-boombox:seek', function(uuid, time)
             end
         end
 
-        SyncData(uuid)
+        SyncData(uniqueId)
     end
 end)
 
-RegisterNetEvent('cs-boombox:changeVolume', function(uuid, volume)
+RegisterNetEvent('cs-boombox:changeVolume', function(uniqueId, volume)
     local source = source
 
-    if (data[uuid] and IsAllowedToControl(uuid, source)) then
-        SetController(uuid, source)
+    if (data[uniqueId] and IsAllowedToControl(uniqueId, source)) then
+        SetController(uniqueId, source)
 
-        if (data[uuid].updater ~= data[uuid].controller) then
-            RefreshCurrentUpdater(uuid)
+        if (data[uniqueId].updater ~= data[uniqueId].controller) then
+            RefreshCurrentUpdater(uniqueId)
         end
 
-        if ((not data[uuid].config.maxVolumePercent) or data[uuid].config.maxVolumePercent >= volume) then
-            data[uuid].media.volume = volume / 100
+        if ((not data[uniqueId].config.maxVolumePercent) or data[uniqueId].config.maxVolumePercent >= volume) then
+            data[uniqueId].media.volume = volume / 100
         else
-            data[uuid].media.volume = data[uuid].config.maxVolumePercent / 100
+            data[uniqueId].media.volume = data[uniqueId].config.maxVolumePercent / 100
         end
 
-        SyncData(uuid)
+        SyncData(uniqueId)
     end
 end)
 
-RegisterNetEvent('cs-boombox:toggleLoop', function(uuid)
+RegisterNetEvent('cs-boombox:toggleLoop', function(uniqueId)
     local source = source
 
-    if (data[uuid] and IsAllowedToControl(uuid, source)) then
-        SetController(uuid, source)
+    if (data[uniqueId] and IsAllowedToControl(uniqueId, source)) then
+        SetController(uniqueId, source)
 
-        if (data[uuid].updater ~= data[uuid].controller) then
-            RefreshCurrentUpdater(uuid)
+        if (data[uniqueId].updater ~= data[uniqueId].controller) then
+            RefreshCurrentUpdater(uniqueId)
         end
 
-        data[uuid].media.loop = not data[uuid].media.loop
+        data[uniqueId].media.loop = not data[uniqueId].media.loop
 
-        SyncData(uuid)
+        SyncData(uniqueId)
     end
 end)
 
-RegisterNetEvent('cs-boombox:addToQueue', function(uuid, url, thumbnailUrl, thumbnailTitle, title, icon)
+RegisterNetEvent('cs-boombox:addToQueue', function(uniqueId, url, thumbnailUrl, thumbnailTitle, title, icon)
     local source = source
 
-    if (data[uuid] and IsAllowedToControl(uuid, source)) then
+    if (data[uniqueId] and IsAllowedToControl(uniqueId, source)) then
         if ((not StartsWith(url, 'https://www.youtube.com/')) and (not StartsWith(url, 'https://www.twitch.tv/')) and (not StartsWith(url, 'https://clips.twitch.tv/'))) then
             return
         end
 
-        SetController(uuid, source)
+        SetController(uniqueId, source)
 
-        if (data[uuid].updater ~= data[uuid].controller) then
-            RefreshCurrentUpdater(uuid)
+        if (data[uniqueId].updater ~= data[uniqueId].controller) then
+            RefreshCurrentUpdater(uniqueId)
         end
 
-        table.insert(queue[uuid], {
+        table.insert(queue[uniqueId], {
             ['url'] = url,
             ['thumbnailUrl'] = thumbnailUrl,
             ['thumbnailTitle'] = thumbnailTitle,
@@ -311,328 +311,328 @@ RegisterNetEvent('cs-boombox:addToQueue', function(uuid, url, thumbnailUrl, thum
             ['manual'] = true
         })
 
-        TriggerEvent('cs-boombox:onEntryQueued', uuid, source, {
+        TriggerEvent('cs-boombox:onEntryQueued', uniqueId, source, {
             ['url'] = url,
             ['thumbnailUrl'] = thumbnailUrl,
             ['thumbnailTitle'] = thumbnailTitle,
             ['title'] = title,
             ['icon'] = icon,
-            ['position'] = #queue[uuid],
+            ['position'] = #queue[uniqueId],
             ['duration'] = nil,
             ['manual'] = true
         })
 
-        SyncQueue(uuid)
+        SyncQueue(uniqueId)
     end
 end)
 
-RegisterNetEvent('cs-boombox:nextQueueSong', function(uuid, uiOpen)
+RegisterNetEvent('cs-boombox:nextQueueSong', function(uniqueId, uiOpen)
     local source = source
 
-    if (data[uuid] and IsAllowedToControl(uuid, source)) then
-        SetController(uuid, source)
+    if (data[uniqueId] and IsAllowedToControl(uniqueId, source)) then
+        SetController(uniqueId, source)
 
-        if (data[uuid].updater ~= data[uuid].controller) then
-            RefreshCurrentUpdater(uuid)
+        if (data[uniqueId].updater ~= data[uniqueId].controller) then
+            RefreshCurrentUpdater(uniqueId)
         end
 
-        if (#queue[uuid] > 0) then
-            local q = queue[uuid][1]
+        if (#queue[uniqueId] > 0) then
+            local q = queue[uniqueId][1]
 
-            table.remove(queue[uuid], 1)
+            table.remove(queue[uniqueId], 1)
 
-            if (data[uuid].media.url ~= q.url) then
-                data[uuid].media.duration = q.duration
+            if (data[uniqueId].media.url ~= q.url) then
+                data[uniqueId].media.duration = q.duration
             end
 
-            data[uuid].media.url = q.url
-            data[uuid].media.thumbnailUrl = q.thumbnailUrl
-            data[uuid].media.thumbnailTitle = q.thumbnailTitle
-            data[uuid].media.title = q.title
-            data[uuid].media.icon = q.icon
-            data[uuid].media.time = 0
+            data[uniqueId].media.url = q.url
+            data[uniqueId].media.thumbnailUrl = q.thumbnailUrl
+            data[uniqueId].media.thumbnailTitle = q.thumbnailTitle
+            data[uniqueId].media.title = q.title
+            data[uniqueId].media.icon = q.icon
+            data[uniqueId].media.time = 0
 
-            TriggerEvent('cs-boombox:onPlay', uuid, source, {
-                ['url'] = data[uuid].media.url,
-                ['thumbnailUrl'] = data[uuid].media.thumbnailUrl,
-                ['thumbnailTitle'] = data[uuid].media.thumbnailTitle,
-                ['title'] = data[uuid].media.title,
-                ['icon'] = data[uuid].media.icon
+            TriggerEvent('cs-boombox:onPlay', uniqueId, source, {
+                ['url'] = data[uniqueId].media.url,
+                ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
+                ['thumbnailTitle'] = data[uniqueId].media.thumbnailTitle,
+                ['title'] = data[uniqueId].media.title,
+                ['icon'] = data[uniqueId].media.icon
             })
         else
-            if (data[uuid].media.playing) then
-                TriggerEvent('cs-boombox:onStop', uuid, source, {
-                    ['url'] = data[uuid].media.url,
-                    ['thumbnailUrl'] = data[uuid].media.thumbnailUrl,
-                    ['thumbnailTitle'] = data[uuid].media.thumbnailTitle,
-                    ['title'] = data[uuid].media.title,
-                    ['icon'] = data[uuid].media.icon
+            if (data[uniqueId].media.playing) then
+                TriggerEvent('cs-boombox:onStop', uniqueId, source, {
+                    ['url'] = data[uniqueId].media.url,
+                    ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
+                    ['thumbnailTitle'] = data[uniqueId].media.thumbnailTitle,
+                    ['title'] = data[uniqueId].media.title,
+                    ['icon'] = data[uniqueId].media.icon
                 })
             end
 
-            data[uuid].media.url = nil
-            data[uuid].media.thumbnailUrl = nil
-            data[uuid].media.thumbnailTitle = nil
-            data[uuid].media.title = nil
-            data[uuid].media.icon = nil
-            data[uuid].media.playing = false
-            data[uuid].media.stopped = true
-            data[uuid].media.time = 0
-            data[uuid].media.duration = nil
+            data[uniqueId].media.url = nil
+            data[uniqueId].media.thumbnailUrl = nil
+            data[uniqueId].media.thumbnailTitle = nil
+            data[uniqueId].media.title = nil
+            data[uniqueId].media.icon = nil
+            data[uniqueId].media.playing = false
+            data[uniqueId].media.stopped = true
+            data[uniqueId].media.time = 0
+            data[uniqueId].media.duration = nil
         end
 
-        SyncQueue(uuid)
+        SyncQueue(uniqueId)
 
-        SyncData(uuid, nil, {
+        SyncData(uniqueId, nil, {
             ['force'] = true
         })
     end
 end)
 
-RegisterNetEvent('cs-boombox:queueNow', function(uuid, index)
+RegisterNetEvent('cs-boombox:queueNow', function(uniqueId, index)
     local source = source
 
-    if (data[uuid] and IsAllowedToControl(uuid, source)) then
-        SetController(uuid, source)
+    if (data[uniqueId] and IsAllowedToControl(uniqueId, source)) then
+        SetController(uniqueId, source)
 
-        if (data[uuid].updater ~= data[uuid].controller) then
-            RefreshCurrentUpdater(uuid)
+        if (data[uniqueId].updater ~= data[uniqueId].controller) then
+            RefreshCurrentUpdater(uniqueId)
         end
 
-        if (queue[uuid][index]) then
-            local q = queue[uuid][index]
+        if (queue[uniqueId][index]) then
+            local q = queue[uniqueId][index]
 
-            table.remove(queue[uuid], index)
+            table.remove(queue[uniqueId], index)
 
-            if (data[uuid].media.url ~= q.url) then
-                data[uuid].media.duration = q.duration
+            if (data[uniqueId].media.url ~= q.url) then
+                data[uniqueId].media.duration = q.duration
             end
 
-            data[uuid].media.url = q.url
-            data[uuid].media.thumbnailUrl = q.thumbnailUrl
-            data[uuid].media.thumbnailTitle = q.thumbnailTitle
-            data[uuid].media.title = q.title
-            data[uuid].media.icon = q.icon
-            data[uuid].media.time = 0
+            data[uniqueId].media.url = q.url
+            data[uniqueId].media.thumbnailUrl = q.thumbnailUrl
+            data[uniqueId].media.thumbnailTitle = q.thumbnailTitle
+            data[uniqueId].media.title = q.title
+            data[uniqueId].media.icon = q.icon
+            data[uniqueId].media.time = 0
 
-            if (data[uuid].media.playing) then
-                TriggerEvent('cs-boombox:onPlay', uuid, source, {
-                    ['url'] = data[uuid].media.url,
-                    ['thumbnailUrl'] = data[uuid].media.thumbnailUrl,
-                    ['thumbnailTitle'] = data[uuid].media.thumbnailTitle,
-                    ['title'] = data[uuid].media.title,
-                    ['icon'] = data[uuid].media.icon
+            if (data[uniqueId].media.playing) then
+                TriggerEvent('cs-boombox:onPlay', uniqueId, source, {
+                    ['url'] = data[uniqueId].media.url,
+                    ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
+                    ['thumbnailTitle'] = data[uniqueId].media.thumbnailTitle,
+                    ['title'] = data[uniqueId].media.title,
+                    ['icon'] = data[uniqueId].media.icon
                 })
             end
         end
 
-        SyncQueue(uuid)
+        SyncQueue(uniqueId)
 
-        SyncData(uuid, nil, {
+        SyncData(uniqueId, nil, {
             ['force'] = true
         })
     end
 end)
 
-RegisterNetEvent('cs-boombox:queueNext', function(uuid, index)
+RegisterNetEvent('cs-boombox:queueNext', function(uniqueId, index)
     local source = source
 
-    if (data[uuid] and IsAllowedToControl(uuid, source)) then
-        SetController(uuid, source)
+    if (data[uniqueId] and IsAllowedToControl(uniqueId, source)) then
+        SetController(uniqueId, source)
 
-        if (data[uuid].updater ~= data[uuid].controller) then
-            RefreshCurrentUpdater(uuid)
+        if (data[uniqueId].updater ~= data[uniqueId].controller) then
+            RefreshCurrentUpdater(uniqueId)
         end
 
-        if (queue[uuid][index]) then
-            local q = queue[uuid][index]
+        if (queue[uniqueId][index]) then
+            local q = queue[uniqueId][index]
 
-            table.insert(queue[uuid], 1, q)
-            table.remove(queue[uuid], index)
+            table.insert(queue[uniqueId], 1, q)
+            table.remove(queue[uniqueId], index)
         end
 
-        SyncQueue(uuid)
+        SyncQueue(uniqueId)
     end
 end)
 
-RegisterNetEvent('cs-boombox:queueRemove', function(uuid, index)
+RegisterNetEvent('cs-boombox:queueRemove', function(uniqueId, index)
     local source = source
 
-    if (data[uuid] and IsAllowedToControl(uuid, source)) then
-        SetController(uuid, source)
+    if (data[uniqueId] and IsAllowedToControl(uniqueId, source)) then
+        SetController(uniqueId, source)
 
-        if (data[uuid].updater ~= data[uuid].controller) then
-            RefreshCurrentUpdater(uuid)
+        if (data[uniqueId].updater ~= data[uniqueId].controller) then
+            RefreshCurrentUpdater(uniqueId)
         end
 
-        if (queue[uuid][index]) then
-            TriggerEvent('cs-boombox:onEntryRemoved', uuid, source, {
-                ['url'] = queue[uuid][index].url,
-                ['thumbnailUrl'] = queue[uuid][index].thumbnailUrl,
-                ['thumbnailTitle'] = queue[uuid][index].thumbnailTitle,
-                ['title'] = queue[uuid][index].title,
-                ['icon'] = queue[uuid][index].icon,
+        if (queue[uniqueId][index]) then
+            TriggerEvent('cs-boombox:onEntryRemoved', uniqueId, source, {
+                ['url'] = queue[uniqueId][index].url,
+                ['thumbnailUrl'] = queue[uniqueId][index].thumbnailUrl,
+                ['thumbnailTitle'] = queue[uniqueId][index].thumbnailTitle,
+                ['title'] = queue[uniqueId][index].title,
+                ['icon'] = queue[uniqueId][index].icon,
                 ['position'] = index,
-                ['manual'] = queue[uuid][index].manual
+                ['manual'] = queue[uniqueId][index].manual
             })
 
-            table.remove(queue[uuid], index)
+            table.remove(queue[uniqueId], index)
         end
 
-        SyncQueue(uuid)
+        SyncQueue(uniqueId)
     end
 end)
 
-RegisterNetEvent('cs-boombox:duration', function(uuid, duration)
+RegisterNetEvent('cs-boombox:duration', function(uniqueId, duration)
     local source = source
 
-    if (data[uuid] and IsAllowedToUpdate(uuid, source) and data[uuid].media.playing) then
-        data[uuid].media.duration = duration
-        TriggerEvent('cs-boombox:onDuration', uuid, source, duration)
+    if (data[uniqueId] and IsAllowedToUpdate(uniqueId, source) and data[uniqueId].media.playing) then
+        data[uniqueId].media.duration = duration
+        TriggerEvent('cs-boombox:onDuration', uniqueId, source, duration)
     end
 end)
 
-RegisterNetEvent('cs-boombox:time', function(uuid, time, force)
+RegisterNetEvent('cs-boombox:time', function(uniqueId, time, force)
     local source = source
 
-    if (data[uuid] and time and IsAllowedToUpdate(uuid, source) and (data[uuid].media.playing or force)) then
-        data[uuid].media.time = time
+    if (data[uniqueId] and time and IsAllowedToUpdate(uniqueId, source) and (data[uniqueId].media.playing or force)) then
+        data[uniqueId].media.time = time
     end
 end)
 
-RegisterNetEvent('cs-boombox:controllerEnded', function(uuid)
+RegisterNetEvent('cs-boombox:controllerEnded', function(uniqueId)
     local source = source
 
-    if (data[uuid] and IsAllowedToUpdate(uuid, source)) then
-        if (data[uuid].media.playing) then
-            if (data[uuid].media.loop) then
-                data[uuid].media.time = 0
+    if (data[uniqueId] and IsAllowedToUpdate(uniqueId, source)) then
+        if (data[uniqueId].media.playing) then
+            if (data[uniqueId].media.loop) then
+                data[uniqueId].media.time = 0
 
-                TriggerEvent('cs-boombox:onPlay', uuid, nil, {
-                    ['url'] = data[uuid].media.url,
-                    ['thumbnailUrl'] = data[uuid].media.thumbnailUrl,
-                    ['thumbnailTitle'] = data[uuid].media.thumbnailTitle,
-                    ['title'] = data[uuid].media.title,
-                    ['icon'] = data[uuid].media.icon
+                TriggerEvent('cs-boombox:onPlay', uniqueId, nil, {
+                    ['url'] = data[uniqueId].media.url,
+                    ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
+                    ['thumbnailTitle'] = data[uniqueId].media.thumbnailTitle,
+                    ['title'] = data[uniqueId].media.title,
+                    ['icon'] = data[uniqueId].media.icon
                 })
-            elseif (#queue[uuid] > 0) then
-                local q = queue[uuid][1]
+            elseif (#queue[uniqueId] > 0) then
+                local q = queue[uniqueId][1]
     
-                table.remove(queue[uuid], 1)
+                table.remove(queue[uniqueId], 1)
 
-                if (data[uuid].media.url ~= q.url) then
-                    data[uuid].media.duration = q.duration
+                if (data[uniqueId].media.url ~= q.url) then
+                    data[uniqueId].media.duration = q.duration
                 end
     
-                data[uuid].media.url = q.url
-                data[uuid].media.thumbnailUrl = q.thumbnailUrl
-                data[uuid].media.thumbnailTitle = q.thumbnailTitle
-                data[uuid].media.title = q.title
-                data[uuid].media.icon = q.icon
-                data[uuid].media.time = 0
+                data[uniqueId].media.url = q.url
+                data[uniqueId].media.thumbnailUrl = q.thumbnailUrl
+                data[uniqueId].media.thumbnailTitle = q.thumbnailTitle
+                data[uniqueId].media.title = q.title
+                data[uniqueId].media.icon = q.icon
+                data[uniqueId].media.time = 0
 
-                TriggerEvent('cs-boombox:onPlay', uuid, nil, {
-                    ['url'] = data[uuid].media.url,
-                    ['thumbnailUrl'] = data[uuid].media.thumbnailUrl,
-                    ['thumbnailTitle'] = data[uuid].media.thumbnailTitle,
-                    ['title'] = data[uuid].media.title,
-                    ['icon'] = data[uuid].media.icon
+                TriggerEvent('cs-boombox:onPlay', uniqueId, nil, {
+                    ['url'] = data[uniqueId].media.url,
+                    ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
+                    ['thumbnailTitle'] = data[uniqueId].media.thumbnailTitle,
+                    ['title'] = data[uniqueId].media.title,
+                    ['icon'] = data[uniqueId].media.icon
                 })
 
-                SyncQueue(uuid)
+                SyncQueue(uniqueId)
             else
-                TriggerEvent('cs-boombox:onStop', uuid, nil, {
-                    ['url'] = data[uuid].media.url,
-                    ['thumbnailUrl'] = data[uuid].media.thumbnailUrl,
-                    ['thumbnailTitle'] = data[uuid].media.thumbnailTitle,
-                    ['title'] = data[uuid].media.title,
-                    ['icon'] = data[uuid].media.icon
+                TriggerEvent('cs-boombox:onStop', uniqueId, nil, {
+                    ['url'] = data[uniqueId].media.url,
+                    ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
+                    ['thumbnailTitle'] = data[uniqueId].media.thumbnailTitle,
+                    ['title'] = data[uniqueId].media.title,
+                    ['icon'] = data[uniqueId].media.icon
                 })
 
-                data[uuid].media.url = nil
-                data[uuid].media.thumbnailUrl = nil
-                data[uuid].media.thumbnailTitle = nil
-                data[uuid].media.title = nil
-                data[uuid].media.icon = nil
-                data[uuid].media.playing = false
-                data[uuid].media.stopped = true
-                data[uuid].media.time = 0
-                data[uuid].media.duration = nil
+                data[uniqueId].media.url = nil
+                data[uniqueId].media.thumbnailUrl = nil
+                data[uniqueId].media.thumbnailTitle = nil
+                data[uniqueId].media.title = nil
+                data[uniqueId].media.icon = nil
+                data[uniqueId].media.playing = false
+                data[uniqueId].media.stopped = true
+                data[uniqueId].media.time = 0
+                data[uniqueId].media.duration = nil
             end
 
-            SyncData(uuid, nil, {
+            SyncData(uniqueId, nil, {
                 ['force'] = true
             })
         end
     end
 end)
 
-RegisterNetEvent('cs-boombox:controllerError', function(uuid)
+RegisterNetEvent('cs-boombox:controllerError', function(uniqueId)
     local source = source
 
-    if (data[uuid] and IsAllowedToUpdate(uuid, source)) then
-        if (data[uuid].media.playing) then
-            if (#queue[uuid] > 0) then
-                local q = queue[uuid][1]
+    if (data[uniqueId] and IsAllowedToUpdate(uniqueId, source)) then
+        if (data[uniqueId].media.playing) then
+            if (#queue[uniqueId] > 0) then
+                local q = queue[uniqueId][1]
     
-                table.remove(queue[uuid], 1)
+                table.remove(queue[uniqueId], 1)
 
-                if (data[uuid].media.url ~= q.url) then
-                    data[uuid].media.duration = q.duration
+                if (data[uniqueId].media.url ~= q.url) then
+                    data[uniqueId].media.duration = q.duration
                 end
     
-                data[uuid].media.url = q.url
-                data[uuid].media.thumbnailUrl = q.thumbnailUrl
-                data[uuid].media.thumbnailTitle = q.thumbnailTitle
-                data[uuid].media.title = q.title
-                data[uuid].media.icon = q.icon
-                data[uuid].media.time = 0
+                data[uniqueId].media.url = q.url
+                data[uniqueId].media.thumbnailUrl = q.thumbnailUrl
+                data[uniqueId].media.thumbnailTitle = q.thumbnailTitle
+                data[uniqueId].media.title = q.title
+                data[uniqueId].media.icon = q.icon
+                data[uniqueId].media.time = 0
 
-                TriggerEvent('cs-boombox:onPlay', uuid, nil, {
-                    ['url'] = data[uuid].media.url,
-                    ['thumbnailUrl'] = data[uuid].media.thumbnailUrl,
-                    ['thumbnailTitle'] = data[uuid].media.thumbnailTitle,
-                    ['title'] = data[uuid].media.title,
-                    ['icon'] = data[uuid].media.icon
+                TriggerEvent('cs-boombox:onPlay', uniqueId, nil, {
+                    ['url'] = data[uniqueId].media.url,
+                    ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
+                    ['thumbnailTitle'] = data[uniqueId].media.thumbnailTitle,
+                    ['title'] = data[uniqueId].media.title,
+                    ['icon'] = data[uniqueId].media.icon
                 })
 
-                SyncQueue(uuid)
+                SyncQueue(uniqueId)
             else
-                TriggerEvent('cs-boombox:onStop', uuid, nil, {
-                    ['url'] = data[uuid].media.url,
-                    ['thumbnailUrl'] = data[uuid].media.thumbnailUrl,
-                    ['thumbnailTitle'] = data[uuid].media.thumbnailTitle,
-                    ['title'] = data[uuid].media.title,
-                    ['icon'] = data[uuid].media.icon
+                TriggerEvent('cs-boombox:onStop', uniqueId, nil, {
+                    ['url'] = data[uniqueId].media.url,
+                    ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
+                    ['thumbnailTitle'] = data[uniqueId].media.thumbnailTitle,
+                    ['title'] = data[uniqueId].media.title,
+                    ['icon'] = data[uniqueId].media.icon
                 })
 
-                data[uuid].media.url = nil
-                data[uuid].media.thumbnailUrl = nil
-                data[uuid].media.thumbnailTitle = nil
-                data[uuid].media.title = nil
-                data[uuid].media.icon = nil
-                data[uuid].media.playing = false
-                data[uuid].media.stopped = true
-                data[uuid].media.time = 0
-                data[uuid].media.duration = nil
+                data[uniqueId].media.url = nil
+                data[uniqueId].media.thumbnailUrl = nil
+                data[uniqueId].media.thumbnailTitle = nil
+                data[uniqueId].media.title = nil
+                data[uniqueId].media.icon = nil
+                data[uniqueId].media.playing = false
+                data[uniqueId].media.stopped = true
+                data[uniqueId].media.time = 0
+                data[uniqueId].media.duration = nil
             end
         end
 
-        SyncData(uuid, nil, {
+        SyncData(uniqueId, nil, {
             ['force'] = true
         })
     end
 end)
 
-RegisterNetEvent('cs-boombox:enteredSyncUUID', function(uuid, model)
+RegisterNetEvent('cs-boombox:enteredSyncUniqueId', function(uniqueId, model)
     local source = source
 
     if (not config.models[model].enabled) then
         return
     end
 
-    if (not data[uuid]) then
-        data[uuid] = {
+    if (not data[uniqueId]) then
+        data[uniqueId] = {
             ['media'] = {
                 ['playing'] = false,
                 ['stopped'] = true,
@@ -658,104 +658,104 @@ RegisterNetEvent('cs-boombox:enteredSyncUUID', function(uuid, model)
         players[source] = {}
     end
 
-    if (data[uuid] and (not Contains(uuid, players[source]))) then
-        table.insert(players[source], uuid)
+    if (data[uniqueId] and (not Contains(uniqueId, players[source]))) then
+        table.insert(players[source], uniqueId)
 
-        data[uuid].syncedPlayers = data[uuid].syncedPlayers + 1
+        data[uniqueId].syncedPlayers = data[uniqueId].syncedPlayers + 1
 
-        if (not data[uuid].updater) then
-            RefreshCurrentUpdater(uuid)
+        if (not data[uniqueId].updater) then
+            RefreshCurrentUpdater(uniqueId)
         end
 
-        SyncQueue(uuid, source)
+        SyncQueue(uniqueId, source)
 
-        SyncData(uuid, source, {
+        SyncData(uniqueId, source, {
             ['force'] = true,
             ['entered'] = true
         })
     end
 end)
 
-RegisterNetEvent('cs-boombox:leftSyncUUID', function(uuid)
+RegisterNetEvent('cs-boombox:leftSyncUniqueId', function(uniqueId)
     local source = source
 
-    if (data[uuid] and players[source] and Contains(uuid, players[source])) then
+    if (data[uniqueId] and players[source] and Contains(uniqueId, players[source])) then
         for i = 1, #players[source] do
-            if (players[source][i] == uuid) then
+            if (players[source][i] == uniqueId) then
                 table.remove(players[source], i)
                 break
             end
         end
 
-        if (data[uuid].controller == source) then
-            ClearController(uuid)
+        if (data[uniqueId].controller == source) then
+            ClearController(uniqueId)
         end
 
-        if (data[uuid].updater == source) then
-            RefreshCurrentUpdater(uuid)
+        if (data[uniqueId].updater == source) then
+            RefreshCurrentUpdater(uniqueId)
         end
 
-        data[uuid].syncedPlayers = data[uuid].syncedPlayers - 1
+        data[uniqueId].syncedPlayers = data[uniqueId].syncedPlayers - 1
 
-        if (data[uuid].syncedPlayers <= 0) then
-            data[uuid] = nil
-            queue[uuid] = nil
+        if (data[uniqueId].syncedPlayers <= 0) then
+            data[uniqueId] = nil
+            queue[uniqueId] = nil
         end
     end
 end)
 
-RegisterNetEvent('cs-boombox:resync', function(uuid, force)
+RegisterNetEvent('cs-boombox:resync', function(uniqueId, force)
     local source = source
 
-    if (data[uuid] and Contains(uuid, players[source])) then
-        SyncData(uuid, source, {
+    if (data[uniqueId] and Contains(uniqueId, players[source])) then
+        SyncData(uniqueId, source, {
             ['force'] = force,
             ['resync'] = true
         })
     end
 end)
 
-RegisterNetEvent('cs-boombox:ui', function(uuid)
+RegisterNetEvent('cs-boombox:ui', function(uniqueId)
     local source = source
 
-    if (data[uuid] and IsAllowedToControl(uuid, source)) then
-        if (not data[uuid].updater) then
-            RefreshCurrentUpdater(uuid)
+    if (data[uniqueId] and IsAllowedToControl(uniqueId, source)) then
+        if (not data[uniqueId].updater) then
+            RefreshCurrentUpdater(uniqueId)
         end
         
-        SyncQueue(uuid)
-        SyncData(uuid)
+        SyncQueue(uniqueId)
+        SyncData(uniqueId)
     end
 end)
 
-RegisterNetEvent('cs-boombox:server', function(uuid)
+RegisterNetEvent('cs-boombox:server', function(uniqueId)
     local source = source
     TriggerClientEvent('cs-boombox:client', source)
 end)
 
-RegisterNetEvent('cs-boombox:fetch', function(uuid)
+RegisterNetEvent('cs-boombox:fetch', function(uniqueId)
     local source = source
     TriggerClientEvent('cs-boombox:params', source, config.duiUrl, GetResourceMetadata(GetCurrentResourceName(), 'version', 0))
 end)
 
-AddEventHandler('cs-boombox:toggleControllerInterface', function(source, uuid)
-    if ((not players[source]) or (not Contains(uuid, players[source]))) then
+AddEventHandler('cs-boombox:toggleControllerInterface', function(source, uniqueId)
+    if ((not players[source]) or (not Contains(uniqueId, players[source]))) then
         return
     end
 
-    controllers[source] = uuid
+    controllers[source] = uniqueId
 
-    TriggerClientEvent('cs-boombox:cui', source, uuid, false)
+    TriggerClientEvent('cs-boombox:cui', source, uniqueId, false)
 end)
 
-AddEventHandler('cs-boombox:disallowControllerInterface', function(source, uuid)
-    if ((not players[source]) or (not Contains(uuid, players[source]))) then
+AddEventHandler('cs-boombox:disallowControllerInterface', function(source, uniqueId)
+    if ((not players[source]) or (not Contains(uniqueId, players[source]))) then
         return
     end
 
     controllers[source] = nil
 
-    TriggerClientEvent('cs-boombox:cui', source, uuid, true)
+    TriggerClientEvent('cs-boombox:cui', source, uniqueId, true)
 end)
 
 AddEventHandler('playerDropped', function(reason)
@@ -852,127 +852,127 @@ end)
 TriggerClientEvent('cs-boombox:client', -1)
 TriggerClientEvent('cs-boombox:params', -1, config.duiUrl, GetResourceMetadata(GetCurrentResourceName(), 'version', 0))
 
-exports('Play', function(uuid)
-    if (not data[uuid]) then
-        error('[cs-boombox] export Play: Unknown uuid provided.')
+exports('Play', function(uniqueId)
+    if (not data[uniqueId]) then
+        error('[cs-boombox] export Play: Unknown uniqueId provided.')
         return
     end
 
     local force = false
 
-    if ((#queue[uuid] > 0) and (not data[uuid].media.url)) then
-        local q = queue[uuid][1]
+    if ((#queue[uniqueId] > 0) and (not data[uniqueId].media.url)) then
+        local q = queue[uniqueId][1]
 
-        table.remove(queue[uuid], 1)
+        table.remove(queue[uniqueId], 1)
 
-        if (data[uuid].media.url ~= q.url) then
-            data[uuid].media.duration = q.duration
+        if (data[uniqueId].media.url ~= q.url) then
+            data[uniqueId].media.duration = q.duration
         end
 
-        data[uuid].media.url = q.url
-        data[uuid].media.thumbnailUrl = q.thumbnailUrl
-        data[uuid].media.thumbnailTitle = q.thumbnailTitle
-        data[uuid].media.title = q.title
-        data[uuid].media.icon = q.icon
-        data[uuid].media.time = 0
+        data[uniqueId].media.url = q.url
+        data[uniqueId].media.thumbnailUrl = q.thumbnailUrl
+        data[uniqueId].media.thumbnailTitle = q.thumbnailTitle
+        data[uniqueId].media.title = q.title
+        data[uniqueId].media.icon = q.icon
+        data[uniqueId].media.time = 0
 
         force = true
     end
 
-    if (data[uuid].media.url and (not data[uuid].media.playing)) then
-        data[uuid].media.playing = true
-        data[uuid].media.stopped = false
+    if (data[uniqueId].media.url and (not data[uniqueId].media.playing)) then
+        data[uniqueId].media.playing = true
+        data[uniqueId].media.stopped = false
     end
 
-    TriggerEvent('cs-boombox:onPlay', uuid, nil, {
-        ['url'] = data[uuid].media.url,
-        ['thumbnailUrl'] = data[uuid].media.thumbnailUrl,
-        ['thumbnailTitle'] = data[uuid].media.thumbnailTitle,
-        ['title'] = data[uuid].media.title,
-        ['icon'] = data[uuid].media.icon
+    TriggerEvent('cs-boombox:onPlay', uniqueId, nil, {
+        ['url'] = data[uniqueId].media.url,
+        ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
+        ['thumbnailTitle'] = data[uniqueId].media.thumbnailTitle,
+        ['title'] = data[uniqueId].media.title,
+        ['icon'] = data[uniqueId].media.icon
     })
 
-    SyncQueue(uuid)
+    SyncQueue(uniqueId)
 
-    SyncData(uuid, nil, {
+    SyncData(uniqueId, nil, {
         ['force'] = force
     })
 end)
 
-exports('Pause', function(uuid)
-    if (not data[uuid]) then
-        error('[cs-boombox] export Pause: Unknown uuid provided.')
+exports('Pause', function(uniqueId)
+    if (not data[uniqueId]) then
+        error('[cs-boombox] export Pause: Unknown uniqueId provided.')
         return
     end
 
-    if (data[uuid].media.playing) then
-        data[uuid].media.playing = false
+    if (data[uniqueId].media.playing) then
+        data[uniqueId].media.playing = false
     end
 
-    TriggerEvent('cs-boombox:onPause', uuid, source, {
-        ['url'] = data[uuid].media.url,
-        ['thumbnailUrl'] = data[uuid].media.thumbnailUrl,
-        ['thumbnailTitle'] = data[uuid].media.thumbnailTitle,
-        ['title'] = data[uuid].media.title,
-        ['icon'] = data[uuid].media.icon
+    TriggerEvent('cs-boombox:onPause', uniqueId, source, {
+        ['url'] = data[uniqueId].media.url,
+        ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
+        ['thumbnailTitle'] = data[uniqueId].media.thumbnailTitle,
+        ['title'] = data[uniqueId].media.title,
+        ['icon'] = data[uniqueId].media.icon
     })
 
-    SyncData(uuid)
+    SyncData(uniqueId)
 end)
 
-exports('Stop', function(uuid)
-    if (not data[uuid]) then
-        error('[cs-boombox] export Stop: Unknown uuid provided.')
+exports('Stop', function(uniqueId)
+    if (not data[uniqueId]) then
+        error('[cs-boombox] export Stop: Unknown uniqueId provided.')
         return
     end
 
-    if (data[uuid].media.playing) then
-        TriggerEvent('cs-boombox:onStop', uuid, source, {
-            ['url'] = data[uuid].media.url,
-            ['thumbnailUrl'] = data[uuid].media.thumbnailUrl,
-            ['thumbnailTitle'] = data[uuid].media.thumbnailTitle,
-            ['title'] = data[uuid].media.title,
-            ['icon'] = data[uuid].media.icon
+    if (data[uniqueId].media.playing) then
+        TriggerEvent('cs-boombox:onStop', uniqueId, source, {
+            ['url'] = data[uniqueId].media.url,
+            ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
+            ['thumbnailTitle'] = data[uniqueId].media.thumbnailTitle,
+            ['title'] = data[uniqueId].media.title,
+            ['icon'] = data[uniqueId].media.icon
         })
     end
 
-    data[uuid].media.playing = false
-    data[uuid].media.stopped = true
-    data[uuid].media.time = 0
-    data[uuid].media.duration = nil
+    data[uniqueId].media.playing = false
+    data[uniqueId].media.stopped = true
+    data[uniqueId].media.time = 0
+    data[uniqueId].media.duration = nil
 
-    SyncData(uuid, nil, {
+    SyncData(uniqueId, nil, {
         ['force'] = true
     })
 end)
 
-exports('IsPlaying', function(uuid)
-    if (not data[uuid]) then
-        error('[cs-boombox] export IsPlaying: Unknown uuid provided.')
+exports('IsPlaying', function(uniqueId)
+    if (not data[uniqueId]) then
+        error('[cs-boombox] export IsPlaying: Unknown uniqueId provided.')
         return
     end
 
-    return data[uuid].media.playing
+    return data[uniqueId].media.playing
 end)
 
-exports('SetLoop', function(uuid, state)
-    if (not data[uuid]) then
-        error('[cs-boombox] export SetLoop: Unknown uuid provided.')
+exports('SetLoop', function(uniqueId, state)
+    if (not data[uniqueId]) then
+        error('[cs-boombox] export SetLoop: Unknown uniqueId provided.')
         return
     end
 
-    data[uuid].media.loop = state
+    data[uniqueId].media.loop = state
 
-    SyncData(uuid)
+    SyncData(uniqueId)
 end)
 
-exports('AddToQueue', function(uuid, url, thumbnailUrl, thumbnailTitle, title, icon, duration)
-    if (not data[uuid]) then
-        error('[cs-boombox] export AddToQueue: Unknown uuid provided.')
+exports('AddToQueue', function(uniqueId, url, thumbnailUrl, thumbnailTitle, title, icon, duration)
+    if (not data[uniqueId]) then
+        error('[cs-boombox] export AddToQueue: Unknown uniqueId provided.')
         return
     end
 
-    table.insert(queue[uuid], {
+    table.insert(queue[uniqueId], {
         ['url'] = url,
         ['thumbnailUrl'] = thumbnailUrl,
         ['thumbnailTitle'] = thumbnailTitle,
@@ -982,70 +982,70 @@ exports('AddToQueue', function(uuid, url, thumbnailUrl, thumbnailTitle, title, i
         ['manual'] = false
     })
 
-    TriggerEvent('cs-boombox:onEntryQueued', uuid, source, {
+    TriggerEvent('cs-boombox:onEntryQueued', uniqueId, source, {
         ['url'] = url,
         ['thumbnailUrl'] = thumbnailUrl,
         ['thumbnailTitle'] = thumbnailTitle,
         ['title'] = title,
         ['icon'] = icon,
-        ['position'] = #queue[uuid],
+        ['position'] = #queue[uniqueId],
         ['duration'] = duration,
         ['manual'] = false
     })
 
-    SyncQueue(uuid)
+    SyncQueue(uniqueId)
 end)
 
-exports('QueueNow', function(uuid, position)
-    if (not data[uuid]) then
-        error('[cs-boombox] export QueueNow: Unknown uuid provided.')
+exports('QueueNow', function(uniqueId, position)
+    if (not data[uniqueId]) then
+        error('[cs-boombox] export QueueNow: Unknown uniqueId provided.')
         return
     end
 
-    if (queue[uuid][position]) then
-        local q = queue[uuid][position]
+    if (queue[uniqueId][position]) then
+        local q = queue[uniqueId][position]
 
-        table.remove(queue[uuid], position)
+        table.remove(queue[uniqueId], position)
 
-        if (data[uuid].media.url ~= q.url) then
-            data[uuid].media.duration = q.duration
+        if (data[uniqueId].media.url ~= q.url) then
+            data[uniqueId].media.duration = q.duration
         end
 
-        data[uuid].media.url = q.url
-        data[uuid].media.thumbnailUrl = q.thumbnailUrl
-        data[uuid].media.thumbnailTitle = q.thumbnailTitle
-        data[uuid].media.title = q.title
-        data[uuid].media.icon = q.icon
-        data[uuid].media.time = 0
+        data[uniqueId].media.url = q.url
+        data[uniqueId].media.thumbnailUrl = q.thumbnailUrl
+        data[uniqueId].media.thumbnailTitle = q.thumbnailTitle
+        data[uniqueId].media.title = q.title
+        data[uniqueId].media.icon = q.icon
+        data[uniqueId].media.time = 0
 
-        if (data[uuid].media.playing) then
-            TriggerEvent('cs-boombox:onPlay', uuid, source, {
-                ['url'] = data[uuid].media.url,
-                ['thumbnailUrl'] = data[uuid].media.thumbnailUrl,
-                ['thumbnailTitle'] = data[uuid].media.thumbnailTitle,
-                ['title'] = data[uuid].media.title,
-                ['icon'] = data[uuid].media.icon
+        if (data[uniqueId].media.playing) then
+            TriggerEvent('cs-boombox:onPlay', uniqueId, source, {
+                ['url'] = data[uniqueId].media.url,
+                ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
+                ['thumbnailTitle'] = data[uniqueId].media.thumbnailTitle,
+                ['title'] = data[uniqueId].media.title,
+                ['icon'] = data[uniqueId].media.icon
             })
         end
     end
 
-    SyncQueue(uuid)
+    SyncQueue(uniqueId)
 
-    SyncData(uuid, nil, {
+    SyncData(uniqueId, nil, {
         ['force'] = true
     })
 end)
 
-exports('RemoveFromQueue', function(uuid, position)
-    if (not data[uuid]) then
-        error('[cs-boombox] export RemoveFromQueue: Unknown uuid provided.')
+exports('RemoveFromQueue', function(uniqueId, position)
+    if (not data[uniqueId]) then
+        error('[cs-boombox] export RemoveFromQueue: Unknown uniqueId provided.')
         return
     end
     
-    if (queue[uuid][position]) then
-        local q = queue[uuid][position]
+    if (queue[uniqueId][position]) then
+        local q = queue[uniqueId][position]
 
-        TriggerEvent('cs-boombox:onEntryRemoved', uuid, source, {
+        TriggerEvent('cs-boombox:onEntryRemoved', uniqueId, source, {
             ['url'] = q.url,
             ['thumbnailUrl'] = q.thumbnailUrl,
             ['thumbnailTitle'] = q.thumbnailTitle,
@@ -1055,26 +1055,26 @@ exports('RemoveFromQueue', function(uuid, position)
             ['manual'] = q.manual
         })
 
-        table.remove(queue[uuid], position)
+        table.remove(queue[uniqueId], position)
     end
 
-    SyncQueue(uuid)
+    SyncQueue(uniqueId)
 end)
 
-exports('GetPlayer', function(uuid)
-    if (not data[uuid]) then
-        error('[cs-boombox] export GetPlayer: Unknown uuid provided.')
+exports('GetPlayer', function(uniqueId)
+    if (not data[uniqueId]) then
+        error('[cs-boombox] export GetPlayer: Unknown uniqueId provided.')
         return
     end
 
-    return data[uuid].media
+    return data[uniqueId].media
 end)
 
-exports('GetQueue', function(uuid)
-    if (not data[uuid]) then
-        error('[cs-boombox] export GetQueue: Unknown uuid provided.')
+exports('GetQueue', function(uniqueId)
+    if (not data[uniqueId]) then
+        error('[cs-boombox] export GetQueue: Unknown uniqueId provided.')
         return
     end
     
-    return queue[uuid]
+    return queue[uniqueId]
 end)
