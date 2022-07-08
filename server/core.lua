@@ -12,7 +12,7 @@ if (config.updatesCheck) then
 
             if (data) then
                 if (data.version ~= version) then
-                    print('[criticalscripts.shop] Resource "cs-boombox" is outdated, please download the latest version through your keymaster.')
+                    print('[criticalscripts.shop] Resource "cs-boombox" is outdated, please download the latest version through our GitHub (https://github.com/criticalscripts-shop/cs-boombox).')
                 else
                     print('[criticalscripts.shop] Resource "cs-boombox" is up to date.')
                 end
