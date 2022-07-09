@@ -27,3 +27,48 @@ function Ternary(a, b, c)
         end
     end
 end
+
+function RotationToDirection(rotation)
+    local z = math.rad(rotation.z)
+    local x = math.rad(math.min(math.max(rotation.x, -30.0), 30.0))
+    local abs = math.abs(math.cos(x))
+    return vector3(-math.sin(z) * abs, math.cos(z) * abs, math.sin(x))
+end
+
+function EnumerateEntities(initFunc, moveFunc, disposeFunc)
+    return coroutine.wrap(function()
+        local iter, id = initFunc()
+
+        if ((not id) or id == 0) then
+            disposeFunc(iter)
+            return
+        end
+
+        local enum = {
+            handle = iter,
+            destructor = disposeFunc
+        }
+
+        setmetatable(enum, {
+            __gc = function(enum)
+                if enum.destructor and enum.handle then
+                    enum.destructor(enum.handle)
+                end
+
+                enum.destructor = nil
+                enum.handle = nil
+            end
+        })
+
+        local next = true
+
+        repeat
+            coroutine.yield(id)
+            next, id = moveFunc(iter)
+        until (not next)
+
+        enum.destructor, enum.handle = nil, nil
+
+        disposeFunc(iter)
+    end)
+end

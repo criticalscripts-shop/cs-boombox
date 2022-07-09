@@ -7,9 +7,8 @@ local internalVersion = '1.0'
 
 local inRangeUniqueIds = {}
 local inRangeObjects = {}
-local configModelToHash = {}
-local configHashToModel = {}
 local instances = {}
+local syncableObjects = {}
 
 local lastSpeakerUpdateAt = 0
 local lastSyncUpdateAt = 0
@@ -33,51 +32,6 @@ local syncUpdateMs = 250
 local timeSyncMs = 3000
 local networkSessionWaitMs = 100
 local browserWaitMs = 100
-
-function EnumerateEntities(initFunc, moveFunc, disposeFunc)
-    return coroutine.wrap(function()
-        local iter, id = initFunc()
-
-        if ((not id) or id == 0) then
-            disposeFunc(iter)
-            return
-        end
-
-        local enum = {
-            handle = iter,
-            destructor = disposeFunc
-        }
-
-        setmetatable(enum, {
-            __gc = function(enum)
-                if enum.destructor and enum.handle then
-                    enum.destructor(enum.handle)
-                end
-
-                enum.destructor = nil
-                enum.handle = nil
-            end
-        })
-
-        local next = true
-
-        repeat
-            coroutine.yield(id)
-            next, id = moveFunc(iter)
-        until (not next)
-
-        enum.destructor, enum.handle = nil, nil
-
-        disposeFunc(iter)
-    end)
-end
-
-function RotationToDirection(rotation)
-    local z = math.rad(rotation.z)
-    local x = math.rad(math.min(math.max(rotation.x, -30.0), 30.0))
-    local abs = math.abs(math.cos(x))
-    return vector3(-math.sin(z) * abs, math.cos(z) * abs, math.sin(x))
-end
 
 function ShowUi(uniqueId)
     if (not CanAccessUi()) then
@@ -302,18 +256,21 @@ function MediaManagerInstance:addSpeaker(options)
 
         table.insert(self.speakers, {
             ['soundOffset'] = Ternary(options.soundOffset, vector3(0.0, 0.0, 0.0)),
-            ['directionOffset'] = Ternary(options.directionOffset, vector3(0.0, 0.0, 0.0)),
+            ['directionOffset'] = Ternary(options.directionOffset, vector3(1.0, 1.0, 1.0)),
             ['id'] = id
         })
+
+        local maxDistance = Ternary(options.maxDistance, config.models[self.model].range / 4)
+        local refDistance = Ternary(options.refDistance, config.models[self.model].range / 8)
 
         SendDuiMessage(self.browserHandle, json.encode({
             ['type'] = 'cs-boombox:addSpeaker',
             ['uniqueId'] = self.uniqueId,
             ['speakerId'] = id,
-            ['maxDistance'] = Ternary(options.maxDistance, config.models[self.model].range / 5),
-            ['refDistance'] = Ternary(options.refDistance, config.models[self.model].range / 8),
+            ['maxDistance'] = Ternary(refDistance > maxDistance, refDistance + (refDistance / 2), maxDistance),
+            ['refDistance'] = refDistance,
             ['rolloffFactor'] = Ternary(options.rolloffFactor, 1.25),
-            ['coneInnerAngle'] = Ternary(options.coneInnerAngle, 90),
+            ['coneInnerAngle'] = Ternary(options.coneInnerAngle, 45),
             ['coneOuterAngle'] = Ternary(options.coneOuterAngle, 180),
             ['coneOuterGain'] = Ternary(options.coneOuterGain, 0.5),
             ['fadeDurationMs'] = Ternary(options.fadeDurationMs, 250),
@@ -355,9 +312,7 @@ function MediaManager(uniqueId, object, model)
     instance.managerQueue = {}
     instance.speakers = {}
 
-    for i = 1, #config.models[instance.model].speakers do
-        instance:addSpeaker(config.models[instance.model].speakers[i])
-    end
+    instance:addSpeaker(config.models[instance.model].speaker)
 
     return instance
 end
@@ -594,6 +549,14 @@ RegisterNetEvent('cs-boombox:controller', function(uniqueId, status)
     end
 end)
 
+RegisterNetEvent('cs-boombox:syncableObject', function(uniqueId, status)
+    if (status) then
+        syncableObjects[uniqueId] = GetGameTimer()
+    else
+        syncableObjects[uniqueId] = nil
+    end
+end)
+
 RegisterNetEvent('cs-boombox:queue', function(uniqueId, queue)
     if (instances[uniqueId]) then
         SendNUIMessage({
@@ -614,7 +577,9 @@ RegisterNetEvent('cs-boombox:params', function(url, version)
     paramsReady = true
 end)
 
-RegisterNetEvent('cs-boombox:sync', function(uniqueId, data, temp)
+RegisterNetEvent('cs-boombox:sync', function(uniqueId, data, temp, syncable)
+    syncableObjects = syncable
+
     if (instances[uniqueId]) then
         SendNUIMessage({
             ['type'] = 'cs-boombox:sync',
@@ -688,44 +653,43 @@ AddEventHandler('onResourceStop', function(resource)
 end)
 
 CreateThread(function()
-    for k, v in pairs(config.models) do
-        configModelToHash[k] = GetHashKey(k)
-        configHashToModel[configModelToHash[k]] = k
-    end
-
     while (true) do
         local playerPed = PlayerPedId()
         local coords = GetEntityCoords(playerPed)
 
         for object in EnumerateEntities(FindFirstObject, FindNextObject, EndFindObject) do
             if (DoesEntityExist(object) and (not HasObjectBeenBroken(object))) then
-                -- TODO: Enumerate and create boomboxes
-                local uniqueId = nil -- TODO: Get boombox UniqueId.
+                local model = GetEntityModel(object)
 
-                if (not inRangeUniqueIds[uniqueId]) then
-                    if (inRangeObjects[object]) then
+                if (configHashToModel[model] and NetworkGetEntityIsNetworked(object)) then
+                    local uniqueId = tostring(NetworkGetNetworkIdFromEntity(object))
+
+                    if (not inRangeUniqueIds[uniqueId]) then
+                        if (inRangeObjects[object]) then
+                            TriggerEvent('cs-boombox:objectOutOfRange', object, inRangeObjects[object])
+                            inRangeObjects[object] = nil
+                        else
+                            local position = GetEntityCoords(object)
+                            local modelKey = configHashToModel[model]
+
+                            if (config.models[modelKey] and config.models[modelKey].enabled and (#(coords - position) <= config.models[modelKey].range)) then
+                                inRangeUniqueIds[uniqueId] = object
+                                inRangeObjects[object] = uniqueId
+                                TriggerEvent('cs-boombox:objectInRange', object, uniqueId, modelKey)
+                            end
+                        end
+                    elseif (inRangeUniqueIds[uniqueId] ~= object and inRangeObjects[object]) then
                         TriggerEvent('cs-boombox:objectOutOfRange', object, inRangeObjects[object])
                         inRangeObjects[object] = nil
-                    else
-                        local model = GetEntityModel(object)
-                        local position = GetEntityCoords(object)
-                        local modelKey = configHashToModel[model]
-
-                        if (config.models[model].enabled and (#(coords - position) <= config.models[model].range)) then
-                            inRangeUniqueIds[uniqueId] = object
-                            inRangeObjects[object] = uniqueId
-                            TriggerEvent('cs-boombox:objectInRange', object, uniqueId, modelKey)
-                        end
                     end
-                elseif (inRangeUniqueIds[uniqueId] ~= object and inRangeObjects[object]) then
-                    TriggerEvent('cs-boombox:objectOutOfRange', object, inRangeObjects[object])
-                    inRangeObjects[object] = nil
                 end
             end
         end
 
         for k, v in pairs(inRangeUniqueIds) do
-            if ((not DoesEntityExist(v)) or HasObjectBeenBroken(v, false) or (#(coords - GetEntityCoords(v)) > config.models[model].range)) then
+            local modelKey = configHashToModel[GetEntityModel(v)]
+
+            if ((not DoesEntityExist(v)) or HasObjectBeenBroken(v, false) or (#(coords - GetEntityCoords(v)) > config.models[modelKey].range)) then
                 TriggerEvent('cs-boombox:objectOutOfRange', v, k)
                 inRangeUniqueIds[k] = nil
                 inRangeObjects[v] = nil
@@ -774,16 +738,15 @@ CreateThread(function()
                         instances[k].manager:updatePlayer(startPosition, playerUpVector, cameraDirection)
                     end
 
-                    if (not instances[k].manager.duiCreated) then
+                    if (syncableObjects[k] and (not instances[k].manager.duiCreated)) then
                         instances[k].manager:createDui()
+                    elseif ((not syncableObjects[k]) and instances[k].manager.duiCreated) then
+                        instances[k].manager:destroyDui()
                     end
 
-                    if (uiAccessible and (not instances[k].manager.serverSynced)) then
+                    if (not instances[k].manager.serverSynced) then
                         instances[k].manager.serverSynced = true
                         TriggerServerEvent('cs-boombox:enteredSyncUniqueId', k, instances[k].model)
-                    elseif ((not uiAccessible) and instances[k].manager.serverSynced) then
-                        instances[k].manager.serverSynced = false
-                        TriggerServerEvent('cs-boombox:leftSyncUniqueId', k)
                     end
                 end
             end
@@ -810,8 +773,4 @@ CreateThread(function()
 
         Wait(mainThreadMs)
     end
-end)
-
-exports('IsUiEnabled', function()
-    return not not uiEnabled
 end)

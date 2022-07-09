@@ -3,7 +3,8 @@ config = {
     ['updatesCheck'] = true,
 
     -- If you want to host the DUI files yourself you can find the source at https://github.com/criticalscripts-shop/cs-boombox-dui, otherwise leave it as it is.
-    ['duiUrl'] = 'https://files.criticalscripts.shop/cs-boombox-dui/dui.html',
+    -- ['duiUrl'] = 'https://files.criticalscripts.shop/cs-boombox-dui/dui.html',
+    ['duiUrl'] = 'http://localhost/dui.html',
 
     -- Strings through-out the resource to translate them if you wish.
     ['lang'] = {
@@ -40,48 +41,53 @@ config = {
     -- Visit our Discord over at https://criticalscripts.shop/discord to get more model entries and share yours too!
 
     ['models'] = {
-        ['boombox1'] = {
+        ['prop_boombox_01'] = {
             ['enabled'] = true,
             ['range'] = 32.0,
-            ['maxVolumePercent'] = 25,
+            ['maxVolumePercent'] = 100,
 
             ['speaker'] = {
-                ['soundOffset'] = nil,
-                ['distanceOffset'] = nil,
+                ['soundOffset'] = vector3(0.0, 0.1, 0.0),
+                ['directionOffset'] = nil,
                 ['maxDistance'] = 16.0,
-                ['refDistance'] = 4.0,
-                ['rolloffFactor'] = 1.25,
-                ['coneInnerAngle'] = 90,
+                ['refDistance'] = 8.0,
+                ['rolloffFactor'] = 1.0,
+                ['coneInnerAngle'] = 45,
                 ['coneOuterAngle'] = 180,
-                ['coneOuterGain'] = 0.5,
+                ['coneOuterGain'] = 0.75,
                 ['fadeDurationMs'] = 250,
-                ['volumeMultiplier'] = 1.0,
-                ['lowPassGainReductionPercent'] = 0
+                ['volumeMultiplier'] = 1.0
             }
         },
     }
 
-        -- Below you can find a full model config entry reference.
-        
-        -- ['model'] = {
-        --     ['enabled'] = boolean,
-        --     ['range'] = number,
-        --     ['maxVolumePercent'] = number,
+    -- Below you can find a full model config entry reference.
+    
+    -- ['model'] = {
+    --     ['enabled'] = boolean,
+    --     ['range'] = number,
+    --     ['maxVolumePercent'] = number,
 
-        --     ['speaker'] = {
-        --         ['soundOffset'] = vector3(number, number, number),
-        --         ['distanceOffset'] = vector3(number, number, number),
-        --         ['maxDistance'] = number,
-        --         ['refDistance'] = number,
-        --         ['rolloffFactor'] = number,
-        --         ['coneInnerAngle'] = number,
-        --         ['coneOuterAngle'] = number,
-        --         ['coneOuterGain'] = number,
-        --         ['fadeDurationMs'] = number,
-        --         ['volumeMultiplier'] = number,
-        --         ['lowPassGainReductionPercent'] = number
-        --         ...
-        --     }
-        -- }
-    }
+    --     ['speaker'] = {
+    --         ['soundOffset'] = vector3(number, number, number),
+    --         ['directionOffset'] = vector3(number, number, number),
+    --         ['maxDistance'] = number,
+    --         ['refDistance'] = number,
+    --         ['rolloffFactor'] = number,
+    --         ['coneInnerAngle'] = number,
+    --         ['coneOuterAngle'] = number,
+    --         ['coneOuterGain'] = number,
+    --         ['fadeDurationMs'] = number,
+    --         ['volumeMultiplier'] = number
+    --         ...
+    --     }
+    -- }
 }
+
+configModelToHash = {}
+configHashToModel = {}
+
+for k, v in pairs(config.models) do
+    configModelToHash[k] = GetHashKey(k)
+    configHashToModel[configModelToHash[k]] = k
+end

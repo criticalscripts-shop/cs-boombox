@@ -7,18 +7,39 @@ local cesReady = false
 local lastAccessedUniqueId = nil
 
 function CanAccessControllerInterface()
-    local uniqueId = nil -- TODO: Get UniqueId of closest boombox. (Temporary)
-    return (not lastAccessedUniqueId or uniqueId == lastAccessedUniqueId) and not IsEntityDead(PlayerPedId())
+    local playerPed = PlayerPedId()
+    return ((not lastAccessedObject) or (DoesEntityExist(lastAccessedObject) and #(GetEntityCoords(lastAccessedObject) - GetEntityCoords(playerPed)) <= 2.0)) and (not IsEntityDead(playerPed))
 end
 
-RegisterCommand('boombox', function ()
-    local uniqueId = nil -- TODO: Get UniqueId of closest boombox or create a UniqueId for the closest boombox and open the UI for it. (Temporary)
+RegisterCommand('boombox', function()
+    local closest = {}
 
-    if (uiAccessible and uniqueId) then
-        lastAccessedUniqueId = uniqueId
-        TriggerServerEvent('cs-boombox:integration:toggleControllerInterface', uniqueId, model) -- TODO: Model: the config entry's key.
+    if (uiAccessible) then
+        local playerCoords = GetEntityCoords(PlayerPedId())
+
+        for object in EnumerateEntities(FindFirstObject, FindNextObject, EndFindObject) do
+            if (DoesEntityExist(object) and (not HasObjectBeenBroken(object))) then
+                local model = GetEntityModel(object)
+
+                if (configHashToModel[model] and NetworkGetEntityIsNetworked(object)) then
+                    local distance = #(GetEntityCoords(object) - playerCoords)
+
+                    if (distance <= 2.0 and ((not closest.handle) or distance < closest.distance)) then
+                        closest.handle = object
+                        closest.model = configHashToModel[model]
+                        closest.distance = distance
+                        closest.uniqueId = tostring(NetworkGetNetworkIdFromEntity(object))
+                    end
+                end
+            end
+        end
+    end
+
+    if (closest.handle) then
+        lastAccessedObject = closest.handle
+        TriggerServerEvent('cs-boombox:integration:toggleControllerInterface', closest.uniqueId, closest.model)
     else
-        lastAccessedUniqueId = nil
+        lastAccessedObject = nil
     end
 end)
 
@@ -38,7 +59,7 @@ CreateThread(function()
             TriggerEvent('cs-boombox:setUiAccessible', uiAccessible)
 
             if (not uiAccessible) then
-                lastAccessedUniqueId = nil
+                lastAccessedObject = nil
             end
         end
 

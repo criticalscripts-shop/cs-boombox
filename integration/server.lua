@@ -1,5 +1,5 @@
 -- Server-side checks and integration of how the boombox UI is accessed.
--- Do whatever checks you want here and execute TriggerEvent('cs-boombox:toggleControllerInterface', source, model) with source being the player ID and model being the model's name (e.g. "prop_boombox_01") to open the boombox UI in a player.
+-- Do whatever checks you want here and execute TriggerEvent('cs-boombox:toggleControllerInterface', source, uniqueId) with source being the player ID and uniqueId being the boombox unique ID to open the boombox UI in a player.
 -- If your checks fail, execute TriggerEvent('cs-boombox:disallowControllerInterface', source) to block remove the controller access (e.g. in case of a dynamic check being updated).
 -- The default integration triggers this via the client command boombox and does a perform native death check (client-side) and a permission check (server-side).
 -- To allow all admins (using Ace group admin) to perform controller duties in all boombox models, add "add_ace group.admin cs-boombox.control allow" in your server's config file.
@@ -26,8 +26,6 @@ function CanAccessControllerInterface(source, model)
 
     return false
 end
-
--- TODO: Simplify this.
 
 RegisterNetEvent('cs-boombox:integration:toggleControllerInterface', function(uniqueId, model)
     local source = source

@@ -33,6 +33,7 @@ local queue = {}
 local players = {}
 local controllers = {}
 local data = {}
+local syncableObjects = {}
 
 function IsAllowedToUpdate(uniqueId, source)
     return data[uniqueId].updater == source
@@ -53,6 +54,22 @@ end
 function SetController(uniqueId, source)
     data[uniqueId].controller = source
     TriggerClientEvent('cs-boombox:controller', data[uniqueId].controller, uniqueId, true)
+end
+
+function TouchSyncableObject(uniqueId)
+    syncableObjects[uniqueId] = GetGameTimer()
+
+    for k, v in pairs(players) do
+        TriggerClientEvent('cs-ves:syncableObject', k, uniqueId, true)
+    end
+end
+
+function ObjectNoLongerSyncable(uniqueId)
+    syncableObjects[uniqueId] = nil
+
+    for k, v in pairs(players) do
+        TriggerClientEvent('cs-ves:syncableObject', k, uniqueId, false)
+    end
 end
 
 function RefreshCurrentUpdater(uniqueId)
@@ -96,11 +113,11 @@ end
 
 function SyncData(uniqueId, target, temp)
     if (target) then
-        TriggerClientEvent('cs-boombox:sync', target, uniqueId, data[uniqueId], temp or {})
+        TriggerClientEvent('cs-boombox:sync', target, uniqueId, data[uniqueId], temp or {}, syncableObjects)
     else
         for k, v in pairs(players) do
             if (Contains(uniqueId, v)) then
-                TriggerClientEvent('cs-boombox:sync', k, uniqueId, data[uniqueId], temp or {})
+                TriggerClientEvent('cs-boombox:sync', k, uniqueId, data[uniqueId], temp or {}, syncableObjects)
             end
         end
     end
@@ -149,6 +166,8 @@ RegisterNetEvent('cs-boombox:play', function(uniqueId, uiOpen)
             data[uniqueId].media.playing = true
             data[uniqueId].media.stopped = false
         end
+
+        TouchSyncableObject(uniqueId)
 
         TriggerEvent('cs-boombox:onPlay', uniqueId, source, {
             ['url'] = data[uniqueId].media.url,
@@ -352,6 +371,8 @@ RegisterNetEvent('cs-boombox:nextQueueSong', function(uniqueId, uiOpen)
             data[uniqueId].media.icon = q.icon
             data[uniqueId].media.time = 0
 
+            TouchSyncableObject(uniqueId)
+
             TriggerEvent('cs-boombox:onPlay', uniqueId, source, {
                 ['url'] = data[uniqueId].media.url,
                 ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
@@ -416,6 +437,8 @@ RegisterNetEvent('cs-boombox:queueNow', function(uniqueId, index)
             data[uniqueId].media.time = 0
 
             if (data[uniqueId].media.playing) then
+                TouchSyncableObject(uniqueId)
+
                 TriggerEvent('cs-boombox:onPlay', uniqueId, source, {
                     ['url'] = data[uniqueId].media.url,
                     ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
@@ -508,6 +531,8 @@ RegisterNetEvent('cs-boombox:controllerEnded', function(uniqueId)
             if (data[uniqueId].media.loop) then
                 data[uniqueId].media.time = 0
 
+                TouchSyncableObject(uniqueId)
+
                 TriggerEvent('cs-boombox:onPlay', uniqueId, nil, {
                     ['url'] = data[uniqueId].media.url,
                     ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
@@ -530,6 +555,8 @@ RegisterNetEvent('cs-boombox:controllerEnded', function(uniqueId)
                 data[uniqueId].media.title = q.title
                 data[uniqueId].media.icon = q.icon
                 data[uniqueId].media.time = 0
+
+                TouchSyncableObject(uniqueId)
 
                 TriggerEvent('cs-boombox:onPlay', uniqueId, nil, {
                     ['url'] = data[uniqueId].media.url,
@@ -587,6 +614,8 @@ RegisterNetEvent('cs-boombox:controllerError', function(uniqueId)
                 data[uniqueId].media.title = q.title
                 data[uniqueId].media.icon = q.icon
                 data[uniqueId].media.time = 0
+
+                TouchSyncableObject(uniqueId)
 
                 TriggerEvent('cs-boombox:onPlay', uniqueId, nil, {
                     ['url'] = data[uniqueId].media.url,
@@ -744,7 +773,6 @@ AddEventHandler('cs-boombox:toggleControllerInterface', function(source, uniqueI
     end
 
     controllers[source] = uniqueId
-
     TriggerClientEvent('cs-boombox:cui', source, uniqueId, false)
 end)
 
@@ -812,6 +840,8 @@ CreateThread(function()
                         data[k].media.title = q.title
                         data[k].media.icon = q.icon
 
+                        TouchSyncableObject(k)
+
                         TriggerEvent('cs-boombox:onPlay', k, nil, {
                             ['url'] = data[k].media.url,
                             ['thumbnailUrl'] = data[k].media.thumbnailUrl,
@@ -849,6 +879,20 @@ CreateThread(function()
     end
 end)
 
+CreateThread(function()
+    while (true) do
+        local timeNow = GetGameTimer()
+
+        for k, v in pairs(syncableObjects) do
+            if ((not data[k].media.playing) and timeNow - v > 180000) then
+                ObjectNoLongerSyncable(k) 
+            end
+        end
+
+        Wait(5000)
+    end
+end)
+
 TriggerClientEvent('cs-boombox:client', -1)
 TriggerClientEvent('cs-boombox:params', -1, config.duiUrl, GetResourceMetadata(GetCurrentResourceName(), 'version', 0))
 
@@ -883,6 +927,8 @@ exports('Play', function(uniqueId)
         data[uniqueId].media.playing = true
         data[uniqueId].media.stopped = false
     end
+
+    TouchSyncableObject(uniqueId)
 
     TriggerEvent('cs-boombox:onPlay', uniqueId, nil, {
         ['url'] = data[uniqueId].media.url,
@@ -1019,6 +1065,8 @@ exports('QueueNow', function(uniqueId, position)
         data[uniqueId].media.time = 0
 
         if (data[uniqueId].media.playing) then
+            TouchSyncableObject(uniqueId)
+
             TriggerEvent('cs-boombox:onPlay', uniqueId, source, {
                 ['url'] = data[uniqueId].media.url,
                 ['thumbnailUrl'] = data[uniqueId].media.thumbnailUrl,
