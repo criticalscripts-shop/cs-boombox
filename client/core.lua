@@ -53,9 +53,11 @@ function ShowUi(uniqueId)
 
     CreateThread(function()
         while (uiEnabled) do
+            DisablePlayerFiring(PlayerId())
             DisableControlAction(0, 1, true)
             DisableControlAction(0, 2, true)
             DisableControlAction(0, 24, true)
+            DisableControlAction(0, 25, true)
             Wait(0)
         end
     end)

@@ -3,8 +3,7 @@ config = {
     ['updatesCheck'] = true,
 
     -- If you want to host the DUI files yourself you can find the source at https://github.com/criticalscripts-shop/cs-boombox-dui, otherwise leave it as it is.
-    -- ['duiUrl'] = 'https://files.criticalscripts.shop/cs-boombox-dui/dui.html',
-    ['duiUrl'] = 'http://localhost/dui.html',
+    ['duiUrl'] = 'https://files.criticalscripts.shop/cs-boombox-dui/dui.html',
 
     -- Strings through-out the resource to translate them if you wish.
     ['lang'] = {
@@ -44,7 +43,7 @@ config = {
         ['prop_boombox_01'] = {
             ['enabled'] = true,
             ['range'] = 32.0,
-            ['maxVolumePercent'] = 100,
+            ['maxVolumePercent'] = 50,
 
             ['speaker'] = {
                 ['soundOffset'] = vector3(0.0, 0.1, 0.0),
@@ -56,7 +55,7 @@ config = {
                 ['coneOuterAngle'] = 180,
                 ['coneOuterGain'] = 0.75,
                 ['fadeDurationMs'] = 250,
-                ['volumeMultiplier'] = 1.0
+                ['volumeMultiplier'] = 0.25
             }
         },
     }
