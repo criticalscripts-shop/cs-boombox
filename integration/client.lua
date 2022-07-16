@@ -111,6 +111,9 @@ RegisterNetEvent('cs-boombox:create', function(model)
     FreezeEntityPosition(handle, true)
 end)
 
+local pickedUpAnimDict = 'impexp_int-0'
+local pickedUpAnimName = 'mp_m_waremech_01_dual-0'
+
 RegisterNetEvent('cs-boombox:pickup', function(model)
     local playerPed = PlayerPedId()
     local handle = GetClosestObjectOfType(GetEntityCoords(playerPed), 2.0, GetHashKey(model), false, false, false)
@@ -127,7 +130,17 @@ RegisterNetEvent('cs-boombox:pickup', function(model)
         Wait(500)
 
         StopAnimTask(playerPed, placeAnimDict, placeAnimName, 2.0)
-        AttachEntityToEntity(handle, playerPed, GetPedBoneIndex(playerPed, 57005), 0.29, 0.0, 0.0, 0.0, 266.0, 60.0, true, true, false, true, 1, true)
+        AttachEntityToEntity(handle, playerPed, GetPedBoneIndex(playerPed, 24817), 0.0, 0.46, -0.016, -180.0, -90.0, 0.0, true, true, false, true, 1, true)
+
+        if (not IsEntityPlayingAnim(playerPed, pickedUpAnimDict, pickedUpAnimName, 3)) then
+            RequestAnimDict(pickedUpAnimDict)
+
+            while (not HasAnimDictLoaded(pickedUpAnimDict)) do
+                Wait(0)
+            end
+        
+            TaskPlayAnim(playerPed, pickedUpAnimDict, pickedUpAnimName, 4.0, 4.0, -1, 51, 0, 0, 0, 0)
+        end
     end
 end)
 
@@ -146,8 +159,10 @@ RegisterNetEvent('cs-boombox:drop', function(model)
     
         Wait(500)
 
+        StopAnimTask(playerPed, pickedUpAnimDict, pickedUpAnimName, 4.0)
         StopAnimTask(playerPed, placeAnimDict, placeAnimName, 2.0)
         DetachEntity(handle, false, true)
+        SetEntityCoords(handle, GetEntityCoords(playerPed) + (GetEntityForwardVector(playerPed) * 0.75))
         PlaceObjectOnGroundProperly(handle)
     end
 end)
@@ -189,6 +204,7 @@ RegisterNetEvent('cs-boombox:destroy', function(model)
             Wait(0)
         end
 
+        StopAnimTask(playerPed, pickedUpAnimDict, pickedUpAnimName, 4.0)
         StopAnimTask(playerPed, placeAnimDict, placeAnimName, 2.0)
         DeleteEntity(handle)
     end
@@ -202,7 +218,7 @@ local animName = 'idle'
 AddEventHandler('cs-boombox:onControllerInterfaceOpen', function()
     local playerPed = PlayerPedId()
 
-    if (not IsEntityPlayingAnim(playerPed, animDict, animName, 3)) then
+    if ((not IsEntityPlayingAnim(playerPed, animDict, animName, 3)) and (not IsEntityPlayingAnim(playerPed, pickedUpAnimDict, pickedUpAnimName, 3))) then
         RequestAnimDict(animDict)
 
         while (not HasAnimDictLoaded(animDict)) do

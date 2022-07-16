@@ -55,7 +55,7 @@ config = {
                 ['coneOuterAngle'] = 180,
                 ['coneOuterGain'] = 0.75,
                 ['fadeDurationMs'] = 250,
-                ['volumeMultiplier'] = 0.25
+                ['volumeMultiplier'] = 0.5
             }
         },
     }
