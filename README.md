@@ -30,7 +30,7 @@ Special thanks to [FildonPrime](https://github.com/FildonPrime) for assisting wi
 -  **YouTube** (live or video) and **Twitch** (live, video or clip) supported.
 -  Player position and camera-based 3D audio.
 -  Minimal UI for full and easy control of what’s happening alongside a queue system.
--  Unlimited number of object models with their own setup given you can create them.
+-  Unlimited number of model objects with their own setup given you can create them.
 -  Range synchronization and considerate optimization for a good balance between performance and features.
 -  Real-time state synchronization between players for both UI and currently playing media.
 -  A wide array of events and exports to check and control the resource.
@@ -41,7 +41,7 @@ Special thanks to [FildonPrime](https://github.com/FildonPrime) for assisting wi
 
 1. Download **_cs-boombox_** and place it in your _**resources**_ folder.
 2. Add _**ensure cs-boombox**_ to your server's configuration file.
-3. Add **_add_ace group.admin cs-boombox.control allow_** to your server's configuration file so Ace admins can access **_/boombox_** command (and by default boombox model related commands).\
+3. Add **_add_ace group.admin cs-boombox.control allow_** to your server's configuration file so Ace admins can access **_/boombox_** command (and by default boombox model control related commands).\
 This check can be changed by modifying **_integration/server.lua_** file.
 4. Check the **_config.lua_** file inside **_cs-boombox_** for further configuration.
 5. Run the command **_refresh_** followed by the command **_ensure cs-boombox_**.
