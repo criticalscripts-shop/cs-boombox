@@ -25,8 +25,8 @@ local pendingDuiCreation = false
 local debugDui = false
 
 local minTriggerValRange = 75
-local mainThreadMs = 100
-local scanThreadMs = 500
+local mainThreadMs = 250
+local scanThreadMs = 1000
 local coreUpdateMs = 200
 local syncUpdateMs = 250
 local timeSyncMs = 3000
