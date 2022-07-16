@@ -2,7 +2,7 @@
 
 # cs-boombox
 
-![cs-boombox](https://i.imgur.com/WrGoSdY.gif "cs-boombox")
+![cs-boombox](https://i.imgur.com/GhbnoET.gif "cs-boombox")
 
 Looking to push your players' entertainment?\
 Give them boomboxes, stereos and more to enjoy!
