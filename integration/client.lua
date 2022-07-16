@@ -3,7 +3,7 @@
 -- You can execute `TriggerEvent('cs-boombox:setUiAccessible', boolean)` to set whether the UI is accessible (client-side), if the UI is open it will be closed and will not open again until its accessible again.
 
 local uiAccessible = false
-local cesReady = false
+local boomboxReady = false
 local lastAccessedUniqueId = nil
 
 function CanAccessControllerInterface()
@@ -46,14 +46,14 @@ end)
 RegisterKeyMapping('boombox', 'Open Interface', 'keyboard', '')
 
 AddEventHandler('cs-boombox:ready', function()
-    cesReady = true
+    boomboxReady = true
 end)
 
 CreateThread(function()
     TriggerEvent('cs-boombox:integrationReady')
 
     while (true) do
-        if (cesReady and CanAccessControllerInterface() ~= uiAccessible) then
+        if (boomboxReady and CanAccessControllerInterface() ~= uiAccessible) then
             uiAccessible = not uiAccessible
 
             TriggerEvent('cs-boombox:setUiAccessible', uiAccessible)
@@ -67,10 +67,137 @@ CreateThread(function()
     end
 end)
 
--- Performing action animations.
 
-local animDict = 'amb@world_human_seat_wall_tablet@female@idle_a'
-local animName = 'idle_c'
+-- Placement & Discard
+
+local placeAnimDict = 'random@domestic'
+local placeAnimName = 'pickup_low'
+
+RegisterNetEvent('cs-boombox:create', function(model)
+    local playerPed = PlayerPedId()
+    local handle = GetClosestObjectOfType(GetEntityCoords(playerPed), 2.0, GetHashKey(model), false, false, false)
+
+    if (handle > 0) then
+        return
+    end
+    
+    RequestAnimDict(placeAnimDict)
+
+    while (not HasAnimDictLoaded(placeAnimDict)) do
+        Wait(0)
+    end
+
+    TaskPlayAnim(playerPed, placeAnimDict, placeAnimName, 4.0, 4.0, -1, 0, 0, 0, 0, 0)
+
+    Wait(750)
+
+    local position = GetEntityCoords(playerPed) + (GetEntityForwardVector(playerPed) * 0.75)
+    local rotation = vector3(0.0, 0.0, 0.0)
+    local modelHash = GetHashKey(model)
+
+    RequestModel(modelHash)
+
+    while (not HasModelLoaded(modelHash)) do
+        Wait(0)
+    end
+
+    StopAnimTask(playerPed, placeAnimDict, placeAnimName, 2.0)
+
+    local object = CreateObject(modelHash, position, true, true, false)
+
+    SetEntityCoords(object, position)
+    SetEntityHeading(object, 0.0)
+    PlaceObjectOnGroundProperly(object)
+    FreezeEntityPosition(handle, true)
+end)
+
+RegisterNetEvent('cs-boombox:pickup', function(model)
+    local playerPed = PlayerPedId()
+    local handle = GetClosestObjectOfType(GetEntityCoords(playerPed), 2.0, GetHashKey(model), false, false, false)
+
+    if (handle > 0 and (not HasObjectBeenBroken(handle)) and GetEntityAttachedTo(handle) == 0) then
+        RequestAnimDict(placeAnimDict)
+    
+        while (not HasAnimDictLoaded(placeAnimDict)) do
+            Wait(0)
+        end
+    
+        TaskPlayAnim(playerPed, placeAnimDict, placeAnimName, 4.0, 4.0, -1, 0, 0, 0, 0, 0)
+    
+        Wait(500)
+
+        StopAnimTask(playerPed, placeAnimDict, placeAnimName, 2.0)
+        AttachEntityToEntity(handle, playerPed, GetPedBoneIndex(playerPed, 57005), 0.29, 0.0, 0.0, 0.0, 266.0, 60.0, true, true, false, true, 1, true)
+    end
+end)
+
+RegisterNetEvent('cs-boombox:drop', function(model)
+    local playerPed = PlayerPedId()
+    local handle = GetClosestObjectOfType(GetEntityCoords(playerPed), 2.0, GetHashKey(model), false, false, false)
+
+    if (handle > 0 and GetEntityAttachedTo(handle) == playerPed) then
+        RequestAnimDict(placeAnimDict)
+    
+        while (not HasAnimDictLoaded(placeAnimDict)) do
+            Wait(0)
+        end
+    
+        TaskPlayAnim(playerPed, placeAnimDict, placeAnimName, 4.0, 4.0, -1, 0, 0, 0, 0, 0)
+    
+        Wait(500)
+
+        StopAnimTask(playerPed, placeAnimDict, placeAnimName, 2.0)
+        DetachEntity(handle, false, true)
+        PlaceObjectOnGroundProperly(handle)
+    end
+end)
+
+RegisterNetEvent('cs-boombox:destroy', function(model)
+    local playerPed = PlayerPedId()
+    local handle = GetClosestObjectOfType(GetEntityCoords(playerPed), 2.0, GetHashKey(model), false, false, false)
+
+    if (handle > 0 and (GetEntityAttachedTo(handle) == 0 or GetEntityAttachedTo(handle) == playerPed)) then
+        RequestAnimDict(placeAnimDict)
+    
+        while (not HasAnimDictLoaded(placeAnimDict)) do
+            Wait(0)
+        end
+    
+        TaskPlayAnim(playerPed, placeAnimDict, placeAnimName, 4.0, 4.0, -1, 0, 0, 0, 0, 0)
+    
+        Wait(750)
+
+        local controlRequestedAt = GetGameTimer()
+        
+        while (not NetworkHasControlOfEntity(handle)) do
+            if (GetGameTimer() - controlRequestedAt >= 5000) then
+                break
+            end
+            
+            Wait(0)
+        end
+
+        controlRequestedAt = GetGameTimer()
+
+        SetEntityAsMissionEntity(handle)
+
+        while (not IsEntityAMissionEntity(handle)) do
+            if (GetGameTimer() - controlRequestedAt >= 5000) then
+                break
+            end
+
+            Wait(0)
+        end
+
+        StopAnimTask(playerPed, placeAnimDict, placeAnimName, 2.0)
+        DeleteEntity(handle)
+    end
+end)
+
+-- Action Animations
+
+local animDict = 'rcmextreme3'
+local animName = 'idle'
 
 AddEventHandler('cs-boombox:onControllerInterfaceOpen', function()
     local playerPed = PlayerPedId()
@@ -82,7 +209,7 @@ AddEventHandler('cs-boombox:onControllerInterfaceOpen', function()
             Wait(0)
         end
     
-        TaskPlayAnim(playerPed, animDict, animName, 4.0, 4.0, -1, 49, 0, 0, 0, 0)
+        TaskPlayAnim(playerPed, animDict, animName, 4.0, 4.0, -1, 1, 0, 0, 0, 0)
     end
 end)
 

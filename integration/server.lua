@@ -37,6 +37,40 @@ RegisterNetEvent('cs-boombox:integration:toggleControllerInterface', function(un
     end
 end)
 
+-- Placement & Discard
+
+RegisterCommand('create-boombox', function(source, args, raw)
+    if (not CanAccessControllerInterface(source, 'prop_boombox_01')) then
+        return
+    end
+
+    TriggerClientEvent('cs-boombox:create', source, 'prop_boombox_01')
+end)
+
+RegisterCommand('pickup-boombox', function(source, args, raw)
+    if (not CanAccessControllerInterface(source, 'prop_boombox_01')) then
+        return
+    end
+
+    TriggerClientEvent('cs-boombox:pickup', source, 'prop_boombox_01')
+end)
+
+RegisterCommand('drop-boombox', function(source, args, raw)
+    if (not CanAccessControllerInterface(source, 'prop_boombox_01')) then
+        return
+    end
+
+    TriggerClientEvent('cs-boombox:drop', source, 'prop_boombox_01')
+end)
+
+RegisterCommand('destroy-boombox', function(source, args, raw)
+    if (not CanAccessControllerInterface(source, 'prop_boombox_01')) then
+        return
+    end
+
+    TriggerClientEvent('cs-boombox:destroy', source, 'prop_boombox_01')
+end)
+
 -- Server Events
 
 AddEventHandler('cs-boombox:onPlay', function(uniqueId, source, data)
