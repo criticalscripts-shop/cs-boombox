@@ -21,7 +21,8 @@ As well as the following commands for boombox model control (using the same cont
  3. `/pickup-boombox` - pick up the closest boombox if one is nearby.
  4. `/drop-boombox` - drop your picked up boombox.
 
-Make sure to join our [Discord](https://criticalscripts.shop/discord) where people may choose to share their configurations for other models or even share your own if you create one!\
+Make sure to join our [Discord](https://criticalscripts.shop/discord) where people may choose to share their configurations for other models or even share your own if you create one!
+
 Special thanks to [FildonPrime](https://github.com/FildonPrime) for assisting with the resource and bringing up the idea.
 
 ## Features
