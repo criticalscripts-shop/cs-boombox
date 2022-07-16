@@ -4,7 +4,7 @@
 
 ![cs-boombox](https://i.imgur.com/GhbnoET.gif "cs-boombox")
 
-Looking to push your players' entertainment?\
+Looking to push your players' entertainment a step forward?\
 Give them boomboxes, stereos and more to enjoy!
 
 This resource is open source and you can customize it to your liking.
