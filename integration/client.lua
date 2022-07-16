@@ -4,7 +4,8 @@
 
 local uiAccessible = false
 local boomboxReady = false
-local lastAccessedUniqueId = nil
+local lastAccessedObject = nil
+local lastAttachedObject = nil
 
 function CanAccessControllerInterface()
     local playerPed = PlayerPedId()
@@ -59,16 +60,27 @@ CreateThread(function()
             TriggerEvent('cs-boombox:setUiAccessible', uiAccessible)
 
             if (not uiAccessible) then
+                if (lastAttachedObject) then
+                    local playerPed = PlayerPedId()
+
+                    StopAnimTask(playerPed, pickedUpAnimDict, pickedUpAnimName, 4.0)
+                    DetachEntity(lastAttachedObject, false, true)
+                    SetEntityCoords(lastAttachedObject, GetEntityCoords(playerPed) + (GetEntityForwardVector(playerPed) * 0.75))
+                    PlaceObjectOnGroundProperly(lastAttachedObject)
+
+                    lastAttachedObject = nil
+                end
+
                 lastAccessedObject = nil
             end
         end
 
-        Wait(1000)
+        Wait(500)
     end
 end)
 
 
--- Placement & Discard
+-- Action Commands
 
 local placeAnimDict = 'random@domestic'
 local placeAnimName = 'pickup_low'
@@ -119,6 +131,8 @@ RegisterNetEvent('cs-boombox:pickup', function(model)
     local handle = GetClosestObjectOfType(GetEntityCoords(playerPed), 2.0, GetHashKey(model), false, false, false)
 
     if (handle > 0 and (not HasObjectBeenBroken(handle)) and GetEntityAttachedTo(handle) == 0) then
+        lastAttachedObject = handle
+
         RequestAnimDict(placeAnimDict)
     
         while (not HasAnimDictLoaded(placeAnimDict)) do
@@ -149,6 +163,8 @@ RegisterNetEvent('cs-boombox:drop', function(model)
     local handle = GetClosestObjectOfType(GetEntityCoords(playerPed), 2.0, GetHashKey(model), false, false, false)
 
     if (handle > 0 and GetEntityAttachedTo(handle) == playerPed) then
+        lastAttachedObject = nil
+
         RequestAnimDict(placeAnimDict)
     
         while (not HasAnimDictLoaded(placeAnimDict)) do
@@ -172,6 +188,8 @@ RegisterNetEvent('cs-boombox:destroy', function(model)
     local handle = GetClosestObjectOfType(GetEntityCoords(playerPed), 2.0, GetHashKey(model), false, false, false)
 
     if (handle > 0 and (GetEntityAttachedTo(handle) == 0 or GetEntityAttachedTo(handle) == playerPed)) then
+        lastAttachedObject = nil
+
         RequestAnimDict(placeAnimDict)
     
         while (not HasAnimDictLoaded(placeAnimDict)) do

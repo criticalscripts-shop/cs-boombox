@@ -5,6 +5,7 @@
 -- To allow all admins (using Ace group admin) to perform controller duties in all boombox models, add "add_ace group.admin cs-boombox.control allow" in your server's config file.
 -- Alternatively to Ace permissions in the default integration, you can add any player identifiers to the array playerIdentifiersAsControllers below to allow specific players to perform controller duties in all boombox models.
 -- You can keep the default integration and edit the default CanAccessControllerInterface function and return true / false based on your conditions.
+-- Action boombox commands (/create-boombox, /destroy-boombox, /pickup-boombox, /drop-boombox) are also included in the default integration and are also checked against the same function. Feel free to remove them or edit them.
 
 local playerIdentifiersAsControllers = {
     'steam:000000000000000', -- Example Steam player identifier.
@@ -37,7 +38,7 @@ RegisterNetEvent('cs-boombox:integration:toggleControllerInterface', function(un
     end
 end)
 
--- Placement & Discard
+-- Action Commands
 
 RegisterCommand('create-boombox', function(source, args, raw)
     if (not CanAccessControllerInterface(source, 'prop_boombox_01')) then
