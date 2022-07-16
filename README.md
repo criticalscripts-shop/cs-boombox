@@ -10,8 +10,7 @@ Give them boomboxes, stereos and more to enjoy!
 This resource is open source and you can customize it to your liking.
 
 It is a standalone resource and works with any framework. The UI is accessed via the `/boombox` command while near an enabled model object for players with Ace permission "cs-boombox.control".\
-This check and how the UI is accessed can be changed by modifying **_integration/client.lua_** and **_integration/server.lua_** files.\
-Enabled model objects will be detected and will work regardless of their spawn method.\
+Enabled model objects will be detected and will work regardless of their spawn method. Permission check and how the UI is accessed can be changed by modifying **_integration/client.lua_** and **_integration/server.lua_** files.\
 There is also an identifier-based check in parallel to Ace permission which can also be edited in integration/server.lua file to add any player identifiers you want.
 
 Out of the box we provide you with configuration for the _`prop_boombox_01`_ object.\
