@@ -86,6 +86,10 @@ local placeAnimDict = 'random@domestic'
 local placeAnimName = 'pickup_low'
 
 RegisterNetEvent('cs-boombox:create', function(model)
+    if (lastAccessedObject) then
+        return
+    end
+
     local playerPed = PlayerPedId()
     local handle = GetClosestObjectOfType(GetEntityCoords(playerPed), 2.0, GetHashKey(model), false, false, false)
 
@@ -127,6 +131,10 @@ local pickedUpAnimDict = 'impexp_int-0'
 local pickedUpAnimName = 'mp_m_waremech_01_dual-0'
 
 RegisterNetEvent('cs-boombox:pickup', function(model)
+    if (lastAccessedObject) then
+        return
+    end
+
     local playerPed = PlayerPedId()
     local handle = GetClosestObjectOfType(GetEntityCoords(playerPed), 2.0, GetHashKey(model), false, false, false)
 
