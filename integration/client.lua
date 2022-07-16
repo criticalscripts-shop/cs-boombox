@@ -124,7 +124,7 @@ RegisterNetEvent('cs-boombox:create', function(model)
     SetEntityCoords(object, position)
     SetEntityHeading(object, 0.0)
     PlaceObjectOnGroundProperly(object)
-    FreezeEntityPosition(handle, true)
+    FreezeEntityPosition(object, true)
 end)
 
 local pickedUpAnimDict = 'impexp_int-0'
