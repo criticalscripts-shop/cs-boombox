@@ -17,8 +17,11 @@ RegisterCommand('boombox', function()
 
     if (uiAccessible) then
         local playerCoords = GetEntityCoords(PlayerPedId())
+        local objects = GetGamePool('CObject')
 
-        for object in EnumerateEntities(FindFirstObject, FindNextObject, EndFindObject) do
+        for i = 0, #objects do
+            local object = objects[i]
+
             if (DoesEntityExist(object) and (not HasObjectBeenBroken(object))) then
                 local model = GetEntityModel(object)
 

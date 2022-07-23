@@ -658,8 +658,11 @@ CreateThread(function()
     while (true) do
         local playerPed = PlayerPedId()
         local coords = GetEntityCoords(playerPed)
+        local objects = GetGamePool('CObject')
 
-        for object in EnumerateEntities(FindFirstObject, FindNextObject, EndFindObject) do
+        for i = 0, #objects do
+            local object = objects[i]
+
             if (DoesEntityExist(object) and (not HasObjectBeenBroken(object))) then
                 local model = GetEntityModel(object)
 
