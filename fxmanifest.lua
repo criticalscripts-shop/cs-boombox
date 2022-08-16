@@ -3,7 +3,7 @@ fx_version 'bodacious'
 game 'gta5'
 
 author 'Critical Scripts | https://criticalscripts.shop'
-version '1.0'
+version '1.1'
 
 lua54 'yes'
 

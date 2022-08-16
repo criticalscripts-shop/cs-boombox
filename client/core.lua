@@ -90,7 +90,7 @@ function MediaManagerInstance:sync(data, temp)
             ['data'] = data,
             ['temp'] = temp
         }
-    else
+    elseif (self.browserHandle) then
         self.syncing = true
         self.pendingSync = nil
 
@@ -139,7 +139,7 @@ function MediaManagerInstance:createDui()
             Wait(browserWaitMs)
         end
 
-        if ((not self.destroyed) and creationId == self.duiCreationId) then
+        if ((not self.destroyed) and creationId == self.duiCreationId and self.browserHandle) then
             SendDuiMessage(self.browserHandle, json.encode({
                 ['type'] = 'cs-boombox:create',
                 ['uniqueId'] = self.uniqueId
@@ -151,7 +151,7 @@ function MediaManagerInstance:createDui()
 end
 
 function MediaManagerInstance:adjust(time)
-    if (self.managerReady) then
+    if (self.managerReady and self.browserHandle) then
         SendDuiMessage(self.browserHandle, json.encode({
             ['type'] = 'cs-boombox:adjust',
             ['uniqueId'] = self.uniqueId,
@@ -161,7 +161,7 @@ function MediaManagerInstance:adjust(time)
 end
 
 function MediaManagerInstance:updatePlayer(startPosition, playerUpVector, cameraDirection)
-    if (not self.browserReady) then
+    if ((not self.browserReady) or (not self.browserHandle)) then
         return
     end
 
@@ -253,7 +253,7 @@ function MediaManagerInstance:addSpeaker(options)
         table.insert(self.managerQueue, function()
             self:addSpeaker(options)
         end)
-    else
+    elseif (self.browserHandle) then
         local id = #self.speakers + 1
 
         table.insert(self.speakers, {
@@ -287,6 +287,7 @@ function MediaManagerInstance:destroyDui()
     
     if (self.browserHandle) then
         DestroyDui(self.browserHandle)
+        self.browserHandle = nil
     end
 end
 
