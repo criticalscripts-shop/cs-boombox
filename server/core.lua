@@ -727,6 +727,7 @@ RegisterNetEvent('cs-boombox:leftSyncUniqueId', function(uniqueId)
         data[uniqueId].syncedPlayers = data[uniqueId].syncedPlayers - 1
 
         if (data[uniqueId].syncedPlayers <= 0) then
+            ObjectNoLongerSyncable(uniqueId)
             data[uniqueId] = nil
             queue[uniqueId] = nil
         end
@@ -802,6 +803,7 @@ AddEventHandler('playerDropped', function(reason)
                     data[k].syncedPlayers = data[k].syncedPlayers - 1
 
                     if (data[k].syncedPlayers <= 0) then
+                        ObjectNoLongerSyncable(k)
                         data[k] = nil
                         queue[k] = nil
                     end
