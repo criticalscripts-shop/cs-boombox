@@ -422,7 +422,7 @@ RegisterNUICallback('controllerPlayingInfo', function(data, callback)
         ['type'] = 'cs-boombox:info',
         ['uniqueId'] = data.uniqueId,
         ['time'] = instances[data.uniqueId].controllerPlayingInfo.time,
-        ['playing'] = instances[data.plate].controllerPlayingInfo.playing,
+        ['playing'] = instances[data.uniqueId].controllerPlayingInfo.playing,
         ['duration'] = instances[data.uniqueId].controllerPlayingInfo.duration
     })
 
