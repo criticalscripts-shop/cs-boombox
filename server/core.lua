@@ -6,7 +6,7 @@ end
 if (config.updatesCheck) then
     local version = GetResourceMetadata(GetCurrentResourceName(), 'version', 0)
 
-    PerformHttpRequest('https://updates.criticalscripts.shop/cs-boombox', function(e, b, h)
+    PerformHttpRequest('https://updates.criticalscripts.com/cs-boombox', function(e, b, h)
         if (e == 200) then
             local data = json.decode(b)
 
