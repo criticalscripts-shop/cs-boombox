@@ -105,16 +105,27 @@ function MediaManagerInstance:sync(data, temp)
             ['url'] = data.url,
 
             ['temp'] = {
-                ['force'] = temp.force,
+                ['force'] = temp.force or self.duiNewlyCreated,
                 ['adjust'] = temp.adjust,
                 ['seek'] = Ternary(temp.media, temp.media and temp.media.seek, false)
             }
         }))
+
+        if (self.duiNewlyCreated) then
+            self.duiNewlyCreated = false
+        end
     end
 end
 
 function MediaManagerInstance:createDui()
     self.duiCreated = true
+    self.duiNewlyCreated = true
+
+    if (not self.recentlyCreated) then
+        self:addSpeaker(config.models[self.model].speaker)
+    else
+        self.recentlyCreated = false
+    end
 
     local creationId = self.duiCreationId
 
@@ -282,6 +293,8 @@ function MediaManagerInstance:addSpeaker(options)
 end
 
 function MediaManagerInstance:destroyDui()
+    self.managerReady = false
+    self.browserReady = false
     self.duiCreated = false
     self.duiCreationId = self.duiCreationId + 1
     
@@ -310,7 +323,9 @@ function MediaManager(uniqueId, object, model)
     instance.destroyed = false
     instance.syncing = false
     instance.duiCreated = false
+    instance.duiNewlyCreated = false
     instance.duiCreationId = 0
+    instance.recentlyCreated = true
     instance.pendingSync = nil
     instance.managerQueue = {}
     instance.speakers = {}
@@ -407,6 +422,7 @@ RegisterNUICallback('controllerPlayingInfo', function(data, callback)
         ['type'] = 'cs-boombox:info',
         ['uniqueId'] = data.uniqueId,
         ['time'] = instances[data.uniqueId].controllerPlayingInfo.time,
+        ['playing'] = instances[data.plate].controllerPlayingInfo.playing,
         ['duration'] = instances[data.uniqueId].controllerPlayingInfo.duration
     })
 

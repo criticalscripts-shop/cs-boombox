@@ -5,6 +5,8 @@ let playing = false
 let stopped = false
 let seekHiding = false
 let lastUrl = null
+let lastDuration = null
+let lastTime = null
 let currentUniqueId = null
 
 const urlCheckElement = document.createElement('input')
@@ -514,6 +516,11 @@ const ready = lang => {
                     }
                 }
 
+                if (e.data.media.url !== lastUrl) {
+                    lastDuration = null
+                    lastTime = null
+                }
+
                 lastUrl = e.data.media.url
 
                 elements.volumeControl.animate({
@@ -534,8 +541,19 @@ const ready = lang => {
 
                 if (pendingSeek || seekHiding)
                     return
+            
+                let finalDuration = e.data.duration
+                let finalTime = e.data.time
 
-                if ((!e.data.duration) || e.data.duration === -1 || stopped) {
+                if (((!finalDuration) || finalDuration === -1) && lastDuration && lastDuration !== -1 && (!e.data.playing)) {
+                    finalDuration = lastDuration
+                    finalTime = lastTime
+                }
+
+                if ((!finalDuration) || finalDuration === -1 || stopped) {
+                    lastDuration = null
+                    lastTime = null
+
                     if (elements.seekControl.css('bottom') === '0px')
                         return
 
@@ -549,10 +567,13 @@ const ready = lang => {
 
                     seekHiding = false
                 } else {
-                    const time = Math.round(e.data.time)
+                    lastDuration = finalDuration
+                    lastTime = finalTime
+
+                    const time = Math.round(finalTime)
                     const timeMinutes = Math.floor(time / 60)
                     const timeSeconds = time - (timeMinutes * 60)
-                    const duration = Math.round(e.data.duration)
+                    const duration = Math.round(finalDuration)
                     const durationMinutes = Math.floor(duration / 60)
                     const durationSeconds = duration - (durationMinutes * 60)
     
