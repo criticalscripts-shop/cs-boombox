@@ -1,4 +1,4 @@
-fx_version 'bodacious'
+fx_version 'cerulean'
 
 game 'gta5'
 
@@ -18,7 +18,10 @@ files {
     'client/ui/fonts/**/*.svg',
     'client/ui/fonts/**/*.ttf',
     'client/ui/fonts/**/*.woff',
-    'client/ui/fonts/**/*.woff2'
+    'client/ui/fonts/**/*.woff2',
+    'client/dui/index.html',
+    'client/dui/images/**/*.png',
+    'client/dui/javascript/**/*.js'
 }
 
 ui_page 'client/ui/index.html'

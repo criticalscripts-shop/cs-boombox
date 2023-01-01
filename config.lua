@@ -2,8 +2,8 @@ config = {
     -- Set whether you want to be informed in your server's console about updates regarding this resource.
     ['updatesCheck'] = true,
 
-    -- If you want to host the DUI files yourself you can find the source at https://github.com/criticalscripts-shop/cs-boombox-dui, otherwise leave it as it is.
-    ['duiUrl'] = 'https://files.criticalscripts.shop/cs-boombox-dui/dui.html',
+    -- The DUI url, by default loaded locally.
+    ['duiUrl'] = 'https://cfx-nui-' .. GetCurrentResourceName() .. '/client/dui/index.html',
 
     -- Strings through-out the resource to translate them if you wish.
     ['lang'] = {

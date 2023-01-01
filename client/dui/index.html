@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <script>
+            if (!navigator.userAgent.includes('CitizenFX'))
+                window.location = 'https://criticalscripts.shop'
+        </script>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+            }
+
+            #youtube-controller, #twitch-controller, #frame-controller {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+
+            #youtube-controller, #twitch-controller, #frame-controller {
+                z-index: 3;
+                background: black;
+            }
+        </style>
+
+        <link rel="shortcut icon" href="images/favicon.png" />
+        <title>Critical Scripts</title>
+    </head>
+
+    <body>
+        <script>
+            YT = undefined
+            Twitch = undefined
+        </script>
+
+        <script src="https://www.youtube.com/iframe_api"></script>
+        <script src="https://player.twitch.tv/js/embed/v1.js"></script>
+
+        <script>
+            const urlParams = new URLSearchParams(window.location.search)
+            const debug = urlParams.get('debug')
+            const version = urlParams.get('v')
+
+            const loadScript = src => {
+                const script = document.createElement('script')
+            
+                script.src = `${src}?v=${version}&c=${debug ? new Date().getTime() : 'on'}`
+                script.type = 'text/javascript'
+                script.async = false
+            
+                document.getElementsByTagName('body')[0].appendChild(script)
+            }
+
+            loadScript('javascript/controllers/dummy.js')
+            loadScript('javascript/controllers/youtube.js')
+            loadScript('javascript/controllers/twitch.js')
+            loadScript('javascript/controllers/frame.js')
+            loadScript('javascript/script.js')
+        </script>
+    </body>
+</html>
