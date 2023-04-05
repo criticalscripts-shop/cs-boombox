@@ -57,4 +57,3 @@ This check can be changed by modifying **_integration/server.lua_** file.
 -  The resource is loading content in every client by using APIs, embeds and inline frames therefore, does not directly violate any copyright laws.
 -  If content fails to load or play for any reason for the player who is controlling the UI, it will stop for everyone. If content fails to load or play for any reason for a player who is only viewing / listening, it may attempt to reload for them.
 -  There are checks in place in an attempt to verify that the transmitted data (titles, thumbnail URL, icon, etc.) are legitimate and are coming from the within resource itself, however since the client sends it, they cannot be fully trusted.
--  The resource by default is using a DUI hosted by us. If you want to self-host it you can find its source code [here](https://github.com/criticalscripts-shop/cs-boombox-dui) and change its URL in the resource's configuration file.
