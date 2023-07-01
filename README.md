@@ -48,7 +48,7 @@ This check can be changed by modifying **_integration/server.lua_** file.
 
 ## Important Information
 
--  The resource is optimized with range synchronization and assets are loaded only when the player is around an active vehicle.
+-  The resource is optimized with range synchronization and assets are loaded only when the player is around an active object.
 -  Very low-spec computers may experience a more downgraded experience.
 -  If you want to ensure the resource, you are advised to stop the playback in all active objects first to avoid crashes.
 -  Minor crackling may be audible on certain songs when the camera is moved due to limitations imposed upon spatial audio.
