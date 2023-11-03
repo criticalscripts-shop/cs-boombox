@@ -1,4 +1,5 @@
 const vodCheckerIntervalMs = 500
+const buttonsCheckIntervalMs = 500
 const seekedDelayMs = 1000
 const playerCheckTimeoutMs = 5000
 const elementId = 'twitch-controller'
@@ -15,6 +16,7 @@ class TwitchController extends DummyController {
         this.source = null
         this.duration = null
         this.media = null
+        this.playerButtonsInterval = null
         this.vodCheckerInterval = null
         this.playerCheckTimeout = null
         this.seekTimeout = null
@@ -51,7 +53,7 @@ class TwitchController extends DummyController {
         player.addEventListener(Twitch.Player.READY, event => {
             this.container = document.getElementById(elementId)
 
-            if (this.container.querySelector('iframe').contentDocument.querySelector('div.content-overlay-gate__allow-pointers > button:not([data-a-target="player-overlay-mature-accept"])')) {
+            if (this.container.querySelector('iframe').contentDocument && this.container.querySelector('iframe').contentDocument.querySelector('div.content-overlay-gate__allow-pointers > button:not([data-a-target="player-overlay-mature-accept"])')) {
                 this.manager.controllerError(this, 'E_TWITCH_VOD_SUB_ONLY')
                 this.stop()
             }
@@ -71,15 +73,26 @@ class TwitchController extends DummyController {
             if (!this.duration)
                 this.duration = player.getDuration() === Infinity ? -1 : player.getDuration()
 
-            const mutedElement = this.container.querySelector('iframe').contentDocument.querySelector('div.muted-segments-alert__content')
-            const mutedButton = mutedElement ? mutedElement.querySelector('button') : null
-            const matureButton = this.container.querySelector('iframe').contentDocument.querySelector('button[data-a-target="player-overlay-mature-accept"]')
+            clearInterval(this.playerButtonsInterval)
 
-            if (mutedButton)
-                mutedButton.click()
+            this.playerButtonsInterval = setInterval(() => {
+                if (!this.container.querySelector('iframe').contentDocument)
+                    return
 
-            if (matureButton)
-                matureButton.click()
+                const mutedElement = this.container.querySelector('iframe').contentDocument.querySelector('div.muted-segments-alert__content')
+                const mutedButton = mutedElement ? mutedElement.querySelector('button') : null
+                const matureButton = this.container.querySelector('iframe').contentDocument.querySelector('button[data-a-target="player-overlay-mature-accept"]')
+                const contentClassificationButton = this.container.querySelector('iframe').contentDocument.querySelector('button[data-a-target="content-classification-gate-overlay-start-watching-button"]')
+
+                if (mutedButton)
+                    mutedButton.click()
+
+                if (matureButton)
+                    matureButton.click()
+
+                if (contentClassificationButton)
+                    contentClassificationButton.click()
+            }, buttonsCheckIntervalMs)
 
             if (this.pending.pause)
                 this.pause()
