@@ -3,7 +3,7 @@ fx_version 'cerulean'
 game 'gta5'
 
 author 'Critical Scripts | https://criticalscripts.shop'
-version '2023-01-30.01'
+version '2025-06-06.01'
 
 lua54 'yes'
 
@@ -11,8 +11,6 @@ files {
     'client/ui/index.html',
     'client/ui/javascript/**/*.js',
     'client/ui/images/**/*.svg',
-    'client/ui/images/**/*.png',
-    'client/ui/images/**/*.jpg',
     'client/ui/css/**/*.css',
     'client/ui/fonts/**/*.eot',
     'client/ui/fonts/**/*.svg',
@@ -20,6 +18,7 @@ files {
     'client/ui/fonts/**/*.woff',
     'client/ui/fonts/**/*.woff2',
     'client/dui/index.html',
+    'client/dui/hls.html',
     'client/dui/images/**/*.png',
     'client/dui/javascript/**/*.js'
 }

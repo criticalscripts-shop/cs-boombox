@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>hls.js</title>
+        <script src="javascript/libraries/hls.min.js"></script>
+    </head>
+    <body>
+        <video id="video" controls autoplay></video>
+        <script>
+            const videoSrc = decodeURIComponent(new URLSearchParams(window.location.search).get('src'))
+            const video = document.getElementById('video')
+
+            if (Hls.isSupported()) {
+                const hls = new Hls()
+
+                hls.loadSource(videoSrc)
+                hls.attachMedia(video)
+
+                hls.on(Hls.Events.MEDIA_ATTACHED, () => window.parent.postMessage({
+                    type: 'frame-controller-hook'
+                }, '*'))
+
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    if (data.fatal)
+                        window.parent.postMessage({
+                            type: 'frame-controller-hook',
+                            error: 'E_SOURCE_ERROR'
+                        }, '*')
+                })
+            } else
+                window.parent.postMessage({
+                    type: 'frame-controller-hook',
+                    error: 'E_SOURCE_NOT_FOUND'
+                }, '*')
+        </script>
+    </body>
+</html>

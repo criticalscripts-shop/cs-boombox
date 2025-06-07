@@ -27,7 +27,17 @@ class FrameController extends DummyController {
         this.frame.src = 'about:blank'
 
         this.frame.addEventListener('load', () => {
-            if (this.source && (!this.stopped))
+            if (this.source && (!this.shouldUseHls(this.source)) && (!this.stopped))
+                this.hook()
+        })
+
+        window.addEventListener('message', event => {
+            if (event.data.type !== 'frame-controller-hook')
+                return
+
+            if (event.data.error)
+                this.manager.controllerError(this, event.data.error)
+            else if (!this.stopped)
                 this.hook()
         })
 
@@ -36,6 +46,10 @@ class FrameController extends DummyController {
         document.body.appendChild(this.frame)
         this.ready = true
         setTimeout(() => cb(), 0)
+    }
+
+    shouldUseHls(source) {
+        return source && (source.endsWith('.m3u8') || source.endsWith('.m3u') || source.endsWith('.mp4') || source.endsWith('.webm'))
     }
 
     hook() {
@@ -221,7 +235,7 @@ class FrameController extends DummyController {
     }
 
     set(source) {
-        if (source === this.source)
+        if (source === this.source || (source && this.shouldUseHls(source) && `https://cfx-nui-${this.manager.resourceName}/client/dui/hls.html?src=${encodeURIComponent(source)}` === this.source))
             return
 
         if (!source) {
@@ -229,6 +243,9 @@ class FrameController extends DummyController {
             this.source = null
             return
         }
+
+        if (this.shouldUseHls(source))
+            source = `https://cfx-nui-${this.manager.resourceName}/client/dui/hls.html?src=${encodeURIComponent(source)}`
     
         this.frame.style = 'display: none'
 

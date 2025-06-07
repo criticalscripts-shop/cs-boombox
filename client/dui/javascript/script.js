@@ -59,6 +59,7 @@ class Speaker {
 
 class MediaManager {
     constructor(uniqueId) {
+        this.resourceName = resourceName
         this.uniqueId = uniqueId
         this.playing = false
 
