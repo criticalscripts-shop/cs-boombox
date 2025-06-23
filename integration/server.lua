@@ -6,26 +6,19 @@
 -- Alternatively to Ace permissions in the default integration, you can add any player identifiers to the array playerIdentifiersAsControllers below to allow specific players to perform controller duties in all boombox models.
 -- You can keep the default integration and edit the default CanAccessControllerInterface function and return true / false based on your conditions.
 -- Action boombox commands (/create-boombox, /destroy-boombox, /pickup-boombox, /drop-boombox) are also included in the default integration and are also checked against the same function. Feel free to remove them or edit them.
+ESX = exports["es_extended"]:getSharedObject()
 
-local playerIdentifiersAsControllers = {
-    'steam:000000000000000', -- Example Steam player identifier.
-    'fivem:000000', -- Example FiveM player identifier.
-}
+ESX.RegisterUsableItem('boombox', function(source)
+    local xPlayer = ESX.GetPlayerFromId(source)
+    
+    TriggerClientEvent('cs-boombox:useBoombox', source)
+    
+    xPlayer.removeInventoryItem('boombox', 1)
+end)
+
 
 function CanAccessControllerInterface(source, model)
-    if (IsPlayerAceAllowed(source, 'cs-boombox.control')) then
-        return true
-    end
-
-    for i = 1, #playerIdentifiersAsControllers do
-        for ii, identifier in ipairs(GetPlayerIdentifiers(source)) do
-            if (string.lower(identifier) == string.lower(playerIdentifiersAsControllers[i])) then
-                return true
-            end
-        end
-    end
-
-    return false
+    return true  
 end
 
 RegisterNetEvent('cs-boombox:integration:toggleControllerInterface', function(uniqueId, model)
@@ -40,37 +33,37 @@ end)
 
 -- Action Commands
 
-RegisterCommand('create-boombox', function(source, args, raw)
-    if (not CanAccessControllerInterface(source, 'prop_boombox_01')) then
-        return
-    end
+-- RegisterCommand('create-boombox', function(source, args, raw)
+--     if (not CanAccessControllerInterface(source, 'prop_boombox_01')) then
+--         return
+--     end
 
-    TriggerClientEvent('cs-boombox:create', source, 'prop_boombox_01')
-end)
+--     TriggerClientEvent('cs-boombox:create', source, 'prop_boombox_01')
+-- end)
 
-RegisterCommand('pickup-boombox', function(source, args, raw)
-    if (not CanAccessControllerInterface(source, 'prop_boombox_01')) then
-        return
-    end
+-- RegisterCommand('pickup-boombox', function(source, args, raw)
+--     if (not CanAccessControllerInterface(source, 'prop_boombox_01')) then
+--         return
+--     end
 
-    TriggerClientEvent('cs-boombox:pickup', source, 'prop_boombox_01')
-end)
+--     TriggerClientEvent('cs-boombox:pickup', source, 'prop_boombox_01')
+-- end)
 
-RegisterCommand('drop-boombox', function(source, args, raw)
-    if (not CanAccessControllerInterface(source, 'prop_boombox_01')) then
-        return
-    end
+-- RegisterCommand('drop-boombox', function(source, args, raw)
+--     if (not CanAccessControllerInterface(source, 'prop_boombox_01')) then
+--         return
+--     end
 
-    TriggerClientEvent('cs-boombox:drop', source, 'prop_boombox_01')
-end)
+--     TriggerClientEvent('cs-boombox:drop', source, 'prop_boombox_01')
+-- end)
 
-RegisterCommand('destroy-boombox', function(source, args, raw)
-    if (not CanAccessControllerInterface(source, 'prop_boombox_01')) then
-        return
-    end
+-- RegisterCommand('destroy-boombox', function(source, args, raw)
+--     if (not CanAccessControllerInterface(source, 'prop_boombox_01')) then
+--         return
+--     end
 
-    TriggerClientEvent('cs-boombox:destroy', source, 'prop_boombox_01')
-end)
+--     TriggerClientEvent('cs-boombox:destroy', source, 'prop_boombox_01')
+-- end)
 
 -- Server Events
 
