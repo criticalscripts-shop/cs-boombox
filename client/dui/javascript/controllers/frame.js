@@ -49,7 +49,7 @@ class FrameController extends DummyController {
     }
 
     shouldUseHls(source) {
-        return source && (source.endsWith('.m3u8') || source.endsWith('.m3u') || source.endsWith('.mp4') || source.endsWith('.webm'))
+        return source && (source.endsWith('.m3u8') || source.endsWith('.m3u'))
     }
 
     hook() {

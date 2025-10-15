@@ -32,7 +32,6 @@ class TwitchController extends DummyController {
         placeholder.id = elementId
 
         this.container = document.body.appendChild(placeholder)
-        this.container.style.display = 'none'
         this.ready = true
 
         setTimeout(() => cb(), 0)
@@ -225,7 +224,6 @@ class TwitchController extends DummyController {
         this.stopped = true
         this.pending.pause = false
         this.pending.seek = null
-        this.container.style.display = 'none'
 
         if (this.player)
             this.player.pause()
@@ -270,8 +268,6 @@ class TwitchController extends DummyController {
             this.attachPlayer(source.replace('channel:', ''), 'channel')
         else if (source.startsWith('video:'))
             this.attachPlayer(source.replace('video:', ''), 'video')
-
-        this.container.style.display = 'none'
 
         if (this.player)
             this.player.pause()
