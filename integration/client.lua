@@ -12,42 +12,161 @@ function CanAccessControllerInterface()
     return ((not lastAccessedObject) or (DoesEntityExist(lastAccessedObject) and #(GetEntityCoords(lastAccessedObject) - GetEntityCoords(playerPed)) <= 2.0)) and (not IsEntityDead(playerPed))
 end
 
-RegisterCommand('boombox', function()
-    local closest = {}
+local boomboxModel = `prop_boombox_01`
+local lastAttachedObject = nil  
 
-    if (uiAccessible) then
-        local playerCoords = GetEntityCoords(PlayerPedId())
-        local objects = GetGamePool('CObject')
 
-        for i = 0, #objects do
-            local object = objects[i]
+exports.ox_target:addModel(boomboxModel, {
+    {
+        name = 'pickup_boombox', 
+        icon = 'fa-solid fa-box',
+        label = 'Llevar Boombox',  
+        distance = 2.0,  
+        onSelect = function(data)
+            TriggerEvent('cs-boombox:pickup', 'prop_boombox_01')
+        end
+    },
+    {
+        name = 'control_boombox', 
+        icon = 'fa-solid fa-music', 
+        label = 'Controlar Música',
+        distance = 2.0, 
+        onSelect = function(data)
+    
+            local closest = {}
+            local playerCoords = GetEntityCoords(PlayerPedId())
+            local objects = GetGamePool('CObject')
 
-            if (DoesEntityExist(object) and (not HasObjectBeenBroken(object))) then
-                local model = GetEntityModel(object)
+            for i = 0, #objects do
+                local object = objects[i]
 
-                if (configHashToModel[model] and NetworkGetEntityIsNetworked(object)) then
-                    local distance = #(GetEntityCoords(object) - playerCoords)
-
-                    if (distance <= 2.0 and ((not closest.handle) or distance < closest.distance)) then
-                        closest.handle = object
-                        closest.model = configHashToModel[model]
-                        closest.distance = distance
-                        closest.uniqueId = tostring(NetworkGetNetworkIdFromEntity(object))
+                if DoesEntityExist(object) and not HasObjectBeenBroken(object) then
+                    local model = GetEntityModel(object)
+                    if model == boomboxModel and NetworkGetEntityIsNetworked(object) then
+                        local distance = #(GetEntityCoords(object) - playerCoords)
+                        if distance <= 2.0 then
+                            closest.handle = object
+                            closest.model = boomboxModel
+                            closest.uniqueId = tostring(NetworkGetNetworkIdFromEntity(object))
+                        end
                     end
                 end
             end
-        end
-    end
 
-    if (closest.handle) then
-        lastAccessedObject = closest.handle
-        TriggerServerEvent('cs-boombox:integration:toggleControllerInterface', closest.uniqueId, closest.model)
-    else
-        lastAccessedObject = nil
+            if closest.handle then
+                TriggerServerEvent('cs-boombox:integration:toggleControllerInterface', closest.uniqueId, closest.model)
+            else
+                print("No hay boombox cercano para controlar.")
+            end
+        end
+    },
+    {
+        name = 'destroy_boombox', 
+        icon = 'fa-solid fa-trash',  
+        label = 'Recoger Boombox',  
+        distance = 2.0, 
+        onSelect = function(data)
+            TriggerServerEvent('cs-boombox:destroyBoombox', 'prop_boombox_01')
+        end
+    }
+})
+
+RegisterNetEvent('cs-boombox:pickup', function(model)
+    local playerPed = PlayerPedId()
+    local handle = GetClosestObjectOfType(GetEntityCoords(playerPed), 2.0, GetHashKey(model), false, false, false)
+
+    if handle > 0 and not HasObjectBeenBroken(handle) and GetEntityAttachedTo(handle) == 0 then
+        lastAttachedObject = handle
+
+        RequestAnimDict('impexp_int-0')
+        while not HasAnimDictLoaded('impexp_int-0') do
+            Wait(0)
+        end
+
+        TaskPlayAnim(playerPed, 'impexp_int-0', 'mp_m_waremech_01_dual-0', 4.0, 4.0, -1, 0, 0, 0, 0, 0)
+        Wait(500)
+        StopAnimTask(playerPed, 'impexp_int-0', 'mp_m_waremech_01_dual-0', 2.0)
+        AttachEntityToEntity(handle, playerPed, GetPedBoneIndex(playerPed, 24817), 0.0, 0.46, -0.016, -180.0, -90.0, 0.0, true, true, false, true, 1, true)
+
+        lib.showTextUI('[E] - Dejar el Boombox', {
+            position = "top-center",
+            icon = 'fa-box',
+            style = {
+                backgroundColor = '#48BB78',
+                color = 'white'
+            }
+        })
     end
 end)
 
-RegisterKeyMapping('boombox', 'Open Interface', 'keyboard', '')
+CreateThread(function()
+    while true do
+        Wait(0)
+
+        if IsControlJustPressed(0, 38) and lastAttachedObject then
+            TriggerEvent('cs-boombox:drop', 'prop_boombox_01')
+            lib.hideTextUI()  
+        end
+    end
+end)
+
+
+RegisterNetEvent('cs-boombox:drop', function(model)
+    local playerPed = PlayerPedId()
+    if lastAttachedObject then
+       
+        RequestAnimDict('random@domestic')
+        while not HasAnimDictLoaded('random@domestic') do
+            Wait(0)
+        end
+
+        TaskPlayAnim(playerPed, 'random@domestic', 'pickup_low', 4.0, 4.0, -1, 0, 0, 0, 0, 0)
+        Wait(500)
+        StopAnimTask(playerPed, 'random@domestic', 'pickup_low', 2.0)
+        DetachEntity(lastAttachedObject, false, true)
+        SetEntityCoords(lastAttachedObject, GetEntityCoords(playerPed) + (GetEntityForwardVector(playerPed) * 0.75))
+        PlaceObjectOnGroundProperly(lastAttachedObject)
+        lastAttachedObject = nil
+    end
+end)
+
+
+-- RegisterCommand('boombox', function()
+--     local closest = {}
+
+--     if (uiAccessible) then
+--         local playerCoords = GetEntityCoords(PlayerPedId())
+--         local objects = GetGamePool('CObject')
+
+--         for i = 0, #objects do
+--             local object = objects[i]
+
+--             if (DoesEntityExist(object) and (not HasObjectBeenBroken(object))) then
+--                 local model = GetEntityModel(object)
+
+--                 if (configHashToModel[model] and NetworkGetEntityIsNetworked(object)) then
+--                     local distance = #(GetEntityCoords(object) - playerCoords)
+
+--                     if (distance <= 2.0 and ((not closest.handle) or distance < closest.distance)) then
+--                         closest.handle = object
+--                         closest.model = configHashToModel[model]
+--                         closest.distance = distance
+--                         closest.uniqueId = tostring(NetworkGetNetworkIdFromEntity(object))
+--                     end
+--                 end
+--             end
+--         end
+--     end
+
+--     if (closest.handle) then
+--         lastAccessedObject = closest.handle
+--         TriggerServerEvent('cs-boombox:integration:toggleControllerInterface', closest.uniqueId, closest.model)
+--     else
+--         lastAccessedObject = nil
+--     end
+-- end)
+
+-- RegisterKeyMapping('boombox', 'Open Interface', 'keyboard', '')
 
 AddEventHandler('cs-boombox:ready', function()
     boomboxReady = true
