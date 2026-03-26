@@ -9,6 +9,12 @@ let lastDuration = null
 let lastTime = null
 let currentUniqueId = null
 
+const escapeHtml = str => {
+    const div = document.createElement('div')
+    div.appendChild(document.createTextNode(str))
+    return div.innerHTML
+}
+
 const urlCheckElement = document.createElement('input')
 
 urlCheckElement.setAttribute('type', 'url')
@@ -484,8 +490,8 @@ const ready = lang => {
                     if (jsElement._tippy)
                         jsElement._tippy.destroy()
                 } else {
-                    elements.mediaTitle.html(e.data.media.title).fadeIn()
-                    elements.mediaImage.html(`<img src="${e.data.media.thumbnailUrl}" alt="${e.data.media.thumbnailUrl}" />`).fadeIn()
+                    elements.mediaTitle.text(e.data.media.title).fadeIn()
+                    elements.mediaImage.empty().append($('<img>').attr('src', e.data.media.thumbnailUrl).attr('alt', e.data.media.thumbnailUrl)).fadeIn()
 
                     const jsElement = $(elements.mediaInfo).get(0)
 
@@ -495,7 +501,7 @@ const ready = lang => {
                     if (e.data.media.thumbnailTitle || e.data.media.icon)
                         tippy(jsElement, {
                             allowHTML: true,
-                            content: `${e.data.media.icon ? `<i class="icon ${e.data.media.icon}"></i>${e.data.media.thumbnailTitle ? `&nbsp;&nbsp;${e.data.media.thumbnailTitle}` : ''}` : e.data.media.thumbnailTitle}`,
+                            content: `${e.data.media.icon ? `<i class="icon ${escapeHtml(e.data.media.icon)}"></i>${e.data.media.thumbnailTitle ? `&nbsp;&nbsp;${escapeHtml(e.data.media.thumbnailTitle)}` : ''}` : escapeHtml(e.data.media.thumbnailTitle || '')}`,
                             placement: 'left'
                         })
                 }
@@ -609,14 +615,17 @@ const ready = lang => {
 
                 for (let index = 0; index < e.data.queue.length; index++) {
                     const q = e.data.queue[index]
-                    const element = $(`<div class="queue-element" data-index="${index + 1}"><div class="queue-image" style="background-image:url(${q.thumbnailUrl})"></div><div class="queue-actions"><div class="queue-title">${q.title}</div><div class="queue-buttons"><span class="queue-button" data-action="queue-now"><i class="fas fa-play"></i> ${lang.queueNow}</span><span class="queue-button" data-action="queue-next"><i class="fas fa-step-forward"></i> ${lang.queueNext}</span><span class="queue-button" data-action="queue-remove"><i class="fas fa-times"></i> ${lang.remove}</span></div></div></div>`)
+                    const element = $('<div class="queue-element"></div>').attr('data-index', index + 1)
+
+                    element.append($('<div class="queue-image"></div>').css('background-image', `url(${CSS.escape(q.thumbnailUrl)})`))
+                    element.append($('<div class="queue-actions"></div>').append($('<div class="queue-title"></div>').text(q.title)).append($(`<div class="queue-buttons"><span class="queue-button" data-action="queue-now"><i class="fas fa-play"></i> ${escapeHtml(lang.queueNow)}</span><span class="queue-button" data-action="queue-next"><i class="fas fa-step-forward"></i> ${escapeHtml(lang.queueNext)}</span><span class="queue-button" data-action="queue-remove"><i class="fas fa-times"></i> ${escapeHtml(lang.remove)}</span></div>`)))
 
                     elements.queue.append(element)
 
                     if (q.thumbnailTitle || q.icon)
                         tippy($(element).get(0), {
                             allowHTML: true,
-                            content: `${q.icon ? `<span class="tooltip-icon"><i class="${q.icon}"></i></span> ` : ''}${q.thumbnailTitle ? `${q.icon ? '&nbsp;' : ''}${q.thumbnailTitle}` : ''}`,
+                            content: `${q.icon ? `<span class="tooltip-icon"><i class="${escapeHtml(q.icon)}"></i></span> ` : ''}${q.thumbnailTitle ? `${q.icon ? '&nbsp;' : ''}${escapeHtml(q.thumbnailTitle)}` : ''}`,
                             placement: 'left'
                         })
                 }
@@ -629,7 +638,7 @@ const ready = lang => {
                 if (e.data.uniqueId !== currentUniqueId)
                     return
 
-                notify(e.data.error, 'error')
+                notify(escapeHtml(e.data.error), 'error')
 
                 break
         }
