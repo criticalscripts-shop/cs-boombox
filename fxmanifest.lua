@@ -3,7 +3,7 @@ fx_version 'cerulean'
 game 'gta5'
 
 author 'Critical Scripts | https://criticalscripts.shop'
-version '2025-10-15.01'
+version '2026-03-26.01'
 
 lua54 'yes'
 
